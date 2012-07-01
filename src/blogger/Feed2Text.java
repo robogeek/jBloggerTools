@@ -73,6 +73,8 @@ public class Feed2Text {
         // ?? print out header information ??
         for (Object o : thefeed.getEntries()) {
             SyndEntryImpl entry = (SyndEntryImpl)o;
+            if (!allowEntry(entry)) continue;
+            
             Object oItem    = entry.getWireEntry();
             Item   rssItem  = null;
             Entry  atomItem = null;
@@ -113,6 +115,10 @@ public class Feed2Text {
             s = n;
         }
         return s;
+    }
+    
+    boolean allowEntry(SyndEntryImpl entry) {
+        return true;
     }
     
     public static void main(String[] args)
