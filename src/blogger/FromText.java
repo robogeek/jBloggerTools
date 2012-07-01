@@ -9,7 +9,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.LinkedList;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
@@ -24,6 +27,8 @@ public class FromText {
             this.title          = null;
             this.date           = null;
             this.url            = null;
+            this.uri            = null;
+            this.id             = null;
             this.description    = null;
             this.image          = null;
             this.youtubeUrl     = null;
@@ -33,6 +38,8 @@ public class FromText {
         LinkedList<String> categories;
         String title;
         String url;
+        String uri;
+        String id;
         String date;
         String description;
         String image;
@@ -58,6 +65,8 @@ public class FromText {
             }
             rv += "title: "+          title          +"\n";
             rv += "url: "+            url            +"\n";
+            rv += "uri: "+            uri            +"\n";
+            rv += "id: "+             id            +"\n";
             rv += "date: "+           date           +"\n";
             rv += "description: "+    description    +"\n";
             rv += "image: "+          image          +"\n";
@@ -99,6 +108,9 @@ public class FromText {
                 if (name.equals("tag"))            { thisRow.categories.add(val);  }
                 if (name.equals("title"))          { thisRow.title          = val; }
                 if (name.equals("url"))            { thisRow.url            = val; }
+                if (name.equals("uri"))            { thisRow.uri            = val; }
+                if (name.equals("rssguid"))        { thisRow.id             = val; }
+                if (name.equals("atomid"))         { thisRow.id             = val; }
                 if (name.equals("date"))           { thisRow.date           = val; }
                 if (name.equals("description"))    { thisRow.description    = val; }
                 if (name.equals("image"))          { thisRow.image          = val; }
@@ -112,13 +124,16 @@ public class FromText {
     
     void postIndividually(Blog blog)
         throws com.google.gdata.util.ServiceException, java.io.IOException,
-            java.net.MalformedURLException
+            java.net.MalformedURLException, ParseException
     {
         for (Row row = rows.peekLast(); row != null; row = rows.peekLast()) {
             DateTime publ;
             
             if (row.date != null && row.date.length() > 0) {
-                publ = DateTime.parseDate(row.date);
+                String[] dates = row.date.split(" ");
+                Date date = new Date(new Long(dates[0]));
+                publ = new DateTime(date);
+                publ.setTzShift(new Integer(dates[1]));
             } else {
                 publ = DateTime.now();
             }
@@ -201,13 +216,19 @@ public class FromText {
     void run(String[] args) 
             throws ParserConfigurationException, SAXException, IOException,
             AuthenticationException, ServiceException, java.io.FileNotFoundException,
-            java.net.MalformedURLException {
+            java.net.MalformedURLException, ParseException {
         
         authorName = args[1];
         userName   = args[2];
         userPasswd = args[3];
         blogId     = args[4];
         inputFile  = args[5];
+        
+//        System.out.println("author name: " + authorName);
+//        System.out.println("user name: " + userName);
+//        System.out.println("user password: " + userPasswd);
+//        System.out.println("blog ID: " + blogId);
+//        System.out.println("input file: " + inputFile);
         
         BloggerService service = new BloggerService("exampleCo-exampleApp-1");
         service.setUserCredentials(userName, userPasswd);
@@ -222,7 +243,8 @@ public class FromText {
     
     public static void main(String[] args) 
             throws ParserConfigurationException, SAXException, IOException,
-            AuthenticationException, ServiceException, java.io.FileNotFoundException {
+            AuthenticationException, ServiceException, 
+            java.io.FileNotFoundException, MalformedURLException, ParseException {
         new FromText().run(args);
     }
 }

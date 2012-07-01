@@ -7,8 +7,10 @@ package blogger;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 import com.sun.syndication.io.FeedException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.ParseException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -21,7 +23,8 @@ public class Main {
     public static void main(String[] args)
             throws ParserConfigurationException, SAXException, IOException,
             AuthenticationException, ServiceException,
-            MalformedURLException, IllegalArgumentException, FeedException
+            MalformedURLException, IllegalArgumentException, FeedException,
+            FileNotFoundException, ParseException
     {
         if (args.length > 0 && args[0].equals("fromtext")) FromText.main(args);
         else if (args.length > 0 && args[0].equals("feed2text")) Feed2Text.main(args);
