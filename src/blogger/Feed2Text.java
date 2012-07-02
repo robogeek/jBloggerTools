@@ -10,6 +10,7 @@ import com.sun.syndication.feed.synd.SyndEntryImpl;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.rss.Item;
+import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
 /**
  *
@@ -86,6 +88,10 @@ public class Feed2Text {
                 // entry.getPublishedDate().toString());
             System.out.println("url: " + entry.getLink());
             System.out.println("uri: " + entry.getUri());
+            for (Object oo : entry.getCategories()) {
+                SyndCategoryImpl category = (SyndCategoryImpl) oo;
+                System.out.println("tag: " + category.getName());
+            }
             if (oItem != null) System.out.println("wireEntry: " + oItem.toString());
             if (rssItem != null) {
                 System.out.println("rssguid: " + rssItem.getGuid());
@@ -118,7 +124,27 @@ public class Feed2Text {
     }
     
     boolean allowEntry(SyndEntryImpl entry) {
+        
+        // check maxAge against entry published date 
+        if (maxAge != null) {
+            Date then = entry.getPublishedDate();
+            Date now = new Date();
+            
+            if ((now.getTime() - then.getTime()) > maxAge)
+                return false;
+        }
+                
         return true;
+    }
+    
+    Long maxAge = null;
+    
+    void setMaxAge(String max) {
+        setMaxAge(new Long(max));
+    }
+    
+    void setMaxAge(Long max) {
+        maxAge = max * 1000 * 3600;
     }
     
     public static void main(String[] args)
@@ -127,6 +153,9 @@ public class Feed2Text {
     {
         HttpURLConnection.setFollowRedirects(true);
         Feed2Text f2t = new Feed2Text(args[1]);
+        if (args.length > 2) {
+            f2t.setMaxAge(args[2]);
+        }
         f2t.get();
         f2t.printEntries();
     }
