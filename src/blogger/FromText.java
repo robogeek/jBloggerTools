@@ -5,10 +5,7 @@ import com.google.gdata.data.DateTime;
 import com.google.gdata.data.IEntry;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -17,9 +14,10 @@ import java.util.LinkedList;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
-// TBD: Need tool to generate an input.txt from an RSS feed, checking w/ a blog to remove duplicates
+// TODO - Separate the Row class, and parseText into it's own class, enabling other uses of parsing the data file
 
 public class FromText {
+
     
     class Row {
         public Row() {
@@ -50,37 +48,52 @@ public class FromText {
         public boolean isEmpty() {
             if (title == null || title.length() <= 0
              || url   == null || url.length() <= 0
-             || description == null || description.length() <= 0) {
+             /*|| description == null || description.length() <= 0*/) {
                 return true;
             } else {
                 return false;
             }
         }
         
+        private static final String tmpl =
+            "title: @title@\n"
+           +"url: @url@\n"
+           +"uri: @uri@\n"
+           +"id: @id@\n"
+           +"date: @date@\n"
+           +"description: @description@\n"
+           +"image: @image@\n"
+           +"youtubeUrl: @youtubeUrl@\n"
+           +"enclosureUrl: @enclosureUrl@\n"
+           +"enclusureMIME: @enclusureMIME@\n"
+           +"@tags@";
+        private static final String tagTmpl = "tag: @tag@\n";
+        
         @Override
         public String toString() {
-            String rv = "";
+            String tags = "";
             for (String tag : categories) {
-                rv += "tag: "+ tag +"\n";
+                tags += tagTmpl.replaceAll("@tag@", tag);
             }
-            rv += "title: "+          title          +"\n";
-            rv += "url: "+            url            +"\n";
-            rv += "uri: "+            uri            +"\n";
-            rv += "id: "+             id            +"\n";
-            rv += "date: "+           date           +"\n";
-            rv += "description: "+    description    +"\n";
-            rv += "image: "+          image          +"\n";
-            rv += "youtubeUrl: "+     youtubeUrl     +"\n";
-            rv += "enclosureUrl: "+   enclosureUrl   +"\n";
-            rv += "enclusureMIME: "+  enclusureMIME  +"\n";
-            return rv;
+            return tmpl
+                    .replaceAll("@title@", (title != null) ? title : "")
+                    .replaceAll("@url@", (url != null) ? url : "")
+                    .replaceAll("@uri@", (uri != null) ? uri : "")
+                    .replaceAll("@id@", (id != null) ? id : "")
+                    .replaceAll("@date@", (date != null) ? date : "")
+                    .replaceAll("@image@", (image != null) ? image : "")
+                    .replaceAll("@description@", (description != null) ? description : "")
+                    .replaceAll("@youtubeUrl@", (youtubeUrl != null) ? youtubeUrl : "")
+                    .replaceAll("@enclosureUrl@", (enclosureUrl != null) ? enclosureUrl : "")
+                    .replaceAll("@enclusureMIME@", (enclusureMIME != null) ? enclusureMIME : "")
+                    .replaceAll("@tags@", (tags != null) ? tags : "");
         }
     }
     
     LinkedList<Row> rows   = null;
     LinkedList<Row> posted = null;
     
-    void parseText(File inputFile)
+    private void parseText(File inputFile)
         throws java.io.FileNotFoundException, java.io.IOException
     {
         FileReader fr = new FileReader(inputFile);
@@ -93,10 +106,12 @@ public class FromText {
                 // - process previously gathered data
                 if (! thisRow.isEmpty()) {
                     rows.addLast(thisRow);
+//                    System.out.println("ADDED " + thisRow.toString());
                     thisRow = new Row();
                 }
                 continue;
             }
+            //System.out.println(line);
             int colon = line.indexOf(":");
             if (colon > 0) {
                 String name = line.substring(0, colon);
@@ -122,13 +137,22 @@ public class FromText {
         fr.close();
     }
     
-    void postIndividually(Blog blog)
+//    String removeCR(String s) {
+//        while (s.endsWith("\r")) {
+//            String n = s.substring(0, s.indexOf("\r")); // + s.substring(s.indexOf("\r") + 1);
+//            s = n;
+//        }
+//        return s;
+//    }
+    
+    private void postIndividually(Blog blog)
         throws com.google.gdata.util.ServiceException, java.io.IOException,
             java.net.MalformedURLException, ParseException
     {
         for (Row row = rows.peekLast(); row != null; row = rows.peekLast()) {
             DateTime publ;
             
+//            System.out.println(row.toString());
             if (row.date != null && row.date.length() > 0) {
                 String[] dates = row.date.split(" ");
                 Date date = new Date(new Long(dates[0]));
@@ -137,20 +161,25 @@ public class FromText {
             } else {
                 publ = DateTime.now();
             }
-            // ?? publ.setTzShift(0);
-            String description = "";
-            description += "<p>"+ row.description +"</p>\n";
-            if (row.image != null && row.image.length() > 0) {
-                description += "<p><img width=450 src=\""+ row.image +"\"/></p>\n";
-            }
-            if (row.enclosureUrl != null && row.enclosureUrl.length() > 0) {
-                description += generateEnclosurePlayer(row.enclosureUrl, row.enclusureMIME);
-            }
-            if (row.youtubeUrl != null && row.youtubeUrl.length() > 0) {
-                 description += generateYoutubeIframe(row.youtubeUrl) +"\n";
-            }
-            description += "<p><span style=\"font-size: x-small;\"><a href=\""+ row.url +"\">"+ row.url +"</a></span></p>\n";
             
+            String description = postBodyTemplate
+                    .replaceAll("@description@", row.description)
+                    .replaceAll("@images@", 
+                        (row.image != null && row.image.length() > 0)
+                        ? imageTemplate.replaceAll("@imageurl@", row.image)
+                        : ""
+                    )
+                    .replaceAll("@youtube@", 
+                        (row.youtubeUrl != null && row.youtubeUrl.length() > 0)
+                        ? generateYoutubeIframe(row.youtubeUrl)
+                        : ""
+                    )
+                    .replaceAll("@url@", row.url)
+                    .replaceAll("@enclosures@", 
+                        (row.enclosureUrl != null && row.enclosureUrl.length() > 0)
+                        ? generateEnclosurePlayer(row.enclosureUrl, row.enclusureMIME)
+                        : ""
+                    );
             IEntry post = blog.createPost(row.title,
                     description,
                     row.categories,
@@ -161,23 +190,74 @@ public class FromText {
         }
     }
     
-    void postSummary()
-        throws java.net.MalformedURLException
+    static final String postBodyTemplate =
+            "<p>@description@</p>\n"
+           +"@images@\n"
+           +"@youtube@\n"
+           +"@enclosures@\n"
+           +"<p><a href=\"@url@>@url@</a></p>\n";
+    
+    static final String postTemplate =
+            "<h2>@title@</h2>\n"
+           +"<p>@description@</p>\n"
+           +"@images@\n"
+           +"@youtube@\n"
+           +"@enclosures@\n"
+           +"<p><span style=\"font-size: x-small;\"><a href=\"@url@>@url@</a></span></p>\n";
+    
+    static final String postTemplate2 =
+            "<h2>@title@</h2>\n"
+           +"<p>@description@</p>\n"
+           +"@images@\n"
+           +"@youtube@\n"
+           +"@enclosures@\n"
+           +"<p><a href=\"@url@>@url@</a></p>\n";
+    
+    static final String enclosureAudioTemplate = ""; // TODO audio enclosure template
+    static final String enclosureVideoTemplate = ""; // TODO video enclosure template
+    
+    static final String imageTemplate = "<p><img width=450 src=\"@imageurl@\"/></p>";
+    
+    static final String youtubeTemplate = "<iframe width=\"450\" height=\"253\" src=\"http://www.youtube.com/embed/@code@\" frameborder=\"0\" allowfullscreen></iframe>";
+    
+    private void postSummary(String postedFile)
+        throws java.net.MalformedURLException, FileNotFoundException
     {
+        PrintStream out = new PrintStream(postedFile);
         for (Row row : posted) {
-            System.out.println("");
-            System.out.println("<h2>"+ row.title +"</h2>");
-            System.out.println("<p>"+ row.description +"</p>");
+            String img = "";
             if (row.image != null && row.image.length() > 0) {
-                System.out.println("<p><img width=450 src=\""+ row.image +"\"/></p>");
+                img = imageTemplate.replaceAll("@imageurl@", row.image);
             }
-            if (row.youtubeUrl != null && row.youtubeUrl.length() > 0) {
-                 System.out.println(generateYoutubeIframe(row.youtubeUrl));
-            }
-            // TBD enclosureUrl enclusureMIME
-            System.out.println("<p><span style=\"font-size: x-small;\"><a href=\""+ row.url +"\">"+ row.url +"</a></span></p>");
-            System.out.println("");
+            out.println("");
+            out.println(
+                    postTemplate.replaceAll("@title@", row.title)
+                        .replaceAll("@description@", row.description)
+                        .replaceAll("@url@", row.url)
+                        .replaceAll("@images@", img)
+                        .replaceAll("@youtube@", 
+                            (row.youtubeUrl != null && row.youtubeUrl.length() > 0)
+                            ? generateYoutubeIframe(row.youtubeUrl)
+                            : "")
+                        .replaceAll("@enclosures@", 
+                            (row.enclosureUrl != null && row.enclosureUrl.length() > 0)
+                            ? generateEnclosurePlayer(row.enclosureUrl, row.enclusureMIME)
+                            : ""
+                        )
+                    );
+            out.println("");
         }
+        out.close();
+    }
+    
+    private void notPostedSummary(String notPostedFile) throws FileNotFoundException {
+        PrintStream out = new PrintStream(notPostedFile);
+        for (Row row : rows) {
+            out.println("");
+            out.println(row.toString());
+            out.println("");
+        }
+        out.close();
     }
     
     // http://www.youtube.com/watch?v=c1wCszOpeYk&feature=g-vrec
@@ -194,7 +274,7 @@ public class FromText {
         for (int i = 0; i < splits.length; i++) {
             if (splits[i].startsWith("v=")) {
                 String code = splits[i].substring(2);
-                return "<iframe width=\"450\" height=\"253\" src=\"http://www.youtube.com/embed/"+ code +"\" frameborder=\"0\" allowfullscreen></iframe>";
+                return youtubeTemplate.replaceAll("@code@", code);
             }
         }
         return "";
@@ -202,7 +282,7 @@ public class FromText {
     
     String generateEnclosurePlayer(String enclUrl, String enclType) {
         
-        // TBD finish this
+        // TODO implement generateEnclosurePlayer
         return "";
     }
     
@@ -212,6 +292,9 @@ public class FromText {
     
     String blogId = null; // "4358407941295111084"; // "3621272226038322596";
     String inputFile = null; // "input.txt";
+    
+    String postedFile = null;
+    String notPostedFile = null;
     
     void run(String[] args) 
             throws ParserConfigurationException, SAXException, IOException,
@@ -224,11 +307,16 @@ public class FromText {
         blogId     = args[4];
         inputFile  = args[5];
         
-//        System.out.println("author name: " + authorName);
-//        System.out.println("user name: " + userName);
-//        System.out.println("user password: " + userPasswd);
-//        System.out.println("blog ID: " + blogId);
-//        System.out.println("input file: " + inputFile);
+        if (args.length >= 7) postedFile    = args[6];
+        if (args.length >= 8) notPostedFile = args[7];
+        
+        System.out.println("author name: " + authorName);
+        System.out.println("user name: " + userName);
+        System.out.println("user password: " + userPasswd);
+        System.out.println("blog ID: " + blogId);
+        System.out.println("input file: " + inputFile);
+        System.out.println("posted file: " + postedFile);
+        System.out.println("not posted file: " + notPostedFile);
         
         BloggerService service = new BloggerService("exampleCo-exampleApp-1");
         service.setUserCredentials(userName, userPasswd);
@@ -236,9 +324,15 @@ public class FromText {
         rows   = new LinkedList<Row>();
         posted = new LinkedList<Row>();
         parseText(new File(inputFile)); 
-        postIndividually(blog);
-        postSummary();
+        try { 
+            postIndividually(blog); 
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
         
+        if (postedFile != null) postSummary(postedFile);
+        if (notPostedFile != null) notPostedSummary(notPostedFile);
     }
     
     public static void main(String[] args) 
