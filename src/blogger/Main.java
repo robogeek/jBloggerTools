@@ -31,7 +31,7 @@ public class Main {
         else if (args.length > 0 && args[0].equals("listblogs")) ListBlogs.main(args);
         else if (args.length > 0 && args[0].equals("drupalcvt")) Converter.main(args);
         else {
-            System.err.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile");
+            System.err.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
             System.err.println("USAGE - Main feed2text feedUrl");
             System.err.println("USAGE - Main listblogs userName userPasswd");
             System.err.println("USAGE - Main drupalcvt");

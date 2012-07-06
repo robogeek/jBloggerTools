@@ -11,6 +11,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -73,20 +74,20 @@ public class FromText {
         public String toString() {
             String tags = "";
             for (String tag : categories) {
-                tags += tagTmpl.replaceAll("@tag@", tag);
+                tags += tagTmpl.replaceAll("@tag@", Matcher.quoteReplacement(tag));
             }
             return tmpl
-                    .replaceAll("@title@", (title != null) ? title : "")
-                    .replaceAll("@url@", (url != null) ? url : "")
-                    .replaceAll("@uri@", (uri != null) ? uri : "")
-                    .replaceAll("@id@", (id != null) ? id : "")
-                    .replaceAll("@date@", (date != null) ? date : "")
-                    .replaceAll("@image@", (image != null) ? image : "")
-                    .replaceAll("@description@", (description != null) ? description : "")
-                    .replaceAll("@youtubeUrl@", (youtubeUrl != null) ? youtubeUrl : "")
-                    .replaceAll("@enclosureUrl@", (enclosureUrl != null) ? enclosureUrl : "")
-                    .replaceAll("@enclusureMIME@", (enclusureMIME != null) ? enclusureMIME : "")
-                    .replaceAll("@tags@", (tags != null) ? tags : "");
+                    .replaceAll("@title@",         (title != null) ? Matcher.quoteReplacement(title) : "")
+                    .replaceAll("@url@",           (url != null) ? Matcher.quoteReplacement(url) : "")
+                    .replaceAll("@uri@",           (uri != null) ? Matcher.quoteReplacement(uri) : "")
+                    .replaceAll("@id@",            (id != null) ? Matcher.quoteReplacement(id) : "")
+                    .replaceAll("@date@",          (date != null) ? Matcher.quoteReplacement(date) : "")
+                    .replaceAll("@image@",         (image != null) ? Matcher.quoteReplacement(image) : "")
+                    .replaceAll("@description@",   (description != null) ? Matcher.quoteReplacement(description) : "")
+                    .replaceAll("@youtubeUrl@",    (youtubeUrl != null) ? Matcher.quoteReplacement(youtubeUrl) : "")
+                    .replaceAll("@enclosureUrl@",  (enclosureUrl != null) ? Matcher.quoteReplacement(enclosureUrl) : "")
+                    .replaceAll("@enclusureMIME@", (enclusureMIME != null) ? Matcher.quoteReplacement(enclusureMIME) : "")
+                    .replaceAll("@tags@", Matcher.quoteReplacement(tags));
         }
     }
     
@@ -149,6 +150,7 @@ public class FromText {
         throws com.google.gdata.util.ServiceException, java.io.IOException,
             java.net.MalformedURLException, ParseException
     {
+        long fakeTime = new Date().getTime() - (1000 * 60 * 30); // start fake time 30 minutes ago
         for (Row row = rows.peekLast(); row != null; row = rows.peekLast()) {
             DateTime publ;
             
@@ -159,14 +161,20 @@ public class FromText {
                 publ = new DateTime(date);
                 publ.setTzShift(new Integer(dates[1]));
             } else {
-                publ = DateTime.now();
+                publ = new DateTime(fakeTime);
+                publ.setTzShift(0);
+                fakeTime += 120 * 1000;  // Fake an advance of time because blogger lops off seconds
             }
             
             String description = postBodyTemplate
-                    .replaceAll("@description@", row.description)
+                    .replaceAll("@description@", 
+                        (row.description != null && row.description.length() > 0)
+                        ? Matcher.quoteReplacement(row.description) : "")
                     .replaceAll("@images@", 
                         (row.image != null && row.image.length() > 0)
-                        ? imageTemplate.replaceAll("@imageurl@", row.image)
+                        ? Matcher.quoteReplacement(
+                            imageTemplate.replaceAll("@imageurl@", Matcher.quoteReplacement(row.image))
+                        )
                         : ""
                     )
                     .replaceAll("@youtube@", 
@@ -174,7 +182,7 @@ public class FromText {
                         ? generateYoutubeIframe(row.youtubeUrl)
                         : ""
                     )
-                    .replaceAll("@url@", row.url)
+                    .replaceAll("@url@", Matcher.quoteReplacement(row.url))
                     .replaceAll("@enclosures@", 
                         (row.enclosureUrl != null && row.enclosureUrl.length() > 0)
                         ? generateEnclosurePlayer(row.enclosureUrl, row.enclusureMIME)
@@ -195,23 +203,25 @@ public class FromText {
            +"@images@\n"
            +"@youtube@\n"
            +"@enclosures@\n"
-           +"<p><a href=\"@url@>@url@</a></p>\n";
+           +"<p><a href=\"@url@\">@url@</a></p>\n";
     
     static final String postTemplate =
-            "<h2>@title@</h2>\n"
+            "<p><b>@title@</b></p>\n"
            +"<p>@description@</p>\n"
            +"@images@\n"
            +"@youtube@\n"
            +"@enclosures@\n"
-           +"<p><span style=\"font-size: x-small;\"><a href=\"@url@>@url@</a></span></p>\n";
+           +"<p><span style=\"font-size: x-small;\"><a href=\"@url@\">@url@</a></span></p>\n"
+           +"<br/><br/>\n";
     
     static final String postTemplate2 =
-            "<h2>@title@</h2>\n"
+            "<p><b>@title@</b></p>\n"
            +"<p>@description@</p>\n"
            +"@images@\n"
            +"@youtube@\n"
            +"@enclosures@\n"
-           +"<p><a href=\"@url@>@url@</a></p>\n";
+           +"<p><a href=\"@url@\">@url@</a></p>\n"
+           +"<br/><br/>\n";
     
     static final String enclosureAudioTemplate = ""; // TODO audio enclosure template
     static final String enclosureVideoTemplate = ""; // TODO video enclosure template
@@ -224,16 +234,20 @@ public class FromText {
         throws java.net.MalformedURLException, FileNotFoundException
     {
         PrintStream out = new PrintStream(postedFile);
-        for (Row row : posted) {
+        // for (Row row : posted) {
+        for (Row row = posted.peekLast(); row != null; row = posted.peekLast()) {
+            posted.remove(row);
             String img = "";
             if (row.image != null && row.image.length() > 0) {
-                img = imageTemplate.replaceAll("@imageurl@", row.image);
+                img = Matcher.quoteReplacement(imageTemplate.replaceAll("@imageurl@", row.image));
             }
             out.println("");
             out.println(
-                    postTemplate.replaceAll("@title@", row.title)
-                        .replaceAll("@description@", row.description)
-                        .replaceAll("@url@", row.url)
+                    postTemplate.replaceAll("@title@", Matcher.quoteReplacement(row.title))
+                        .replaceAll("@description@",  
+                            (row.description != null && row.description.length() > 0)
+                            ? Matcher.quoteReplacement(row.description) : "")
+                        .replaceAll("@url@", Matcher.quoteReplacement(row.url))
                         .replaceAll("@images@", img)
                         .replaceAll("@youtube@", 
                             (row.youtubeUrl != null && row.youtubeUrl.length() > 0)
@@ -252,7 +266,9 @@ public class FromText {
     
     private void notPostedSummary(String notPostedFile) throws FileNotFoundException {
         PrintStream out = new PrintStream(notPostedFile);
-        for (Row row : rows) {
+        // for (Row row : rows) {
+        for (Row row = rows.peekLast(); row != null; row = rows.peekLast()) {
+            rows.remove(row);
             out.println("");
             out.println(row.toString());
             out.println("");
@@ -274,7 +290,9 @@ public class FromText {
         for (int i = 0; i < splits.length; i++) {
             if (splits[i].startsWith("v=")) {
                 String code = splits[i].substring(2);
-                return youtubeTemplate.replaceAll("@code@", code);
+                return Matcher.quoteReplacement(
+                        youtubeTemplate.replaceAll("@code@", Matcher.quoteReplacement(code))
+                        );
             }
         }
         return "";
@@ -283,7 +301,7 @@ public class FromText {
     String generateEnclosurePlayer(String enclUrl, String enclType) {
         
         // TODO implement generateEnclosurePlayer
-        return "";
+        return Matcher.quoteReplacement("");
     }
     
     String authorName = null; // "David Herron";
