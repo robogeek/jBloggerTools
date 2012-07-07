@@ -20,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
+import org.jdom.Element;
 
 /**
  *
@@ -67,6 +69,7 @@ public class Feed2Text {
             reader = new XmlReader(feedURL);
         }
         SyndFeedInput input = new SyndFeedInput();
+        input.setPreserveWireFeed(true);
         thefeed = input.build(reader);
     }
     
@@ -80,6 +83,8 @@ public class Feed2Text {
             Object oItem    = entry.getWireEntry();
             Item   rssItem  = null;
             Entry  atomItem = null;
+            
+//            if (oItem != null) System.out.println("wireEntry: " + oItem.toString()); 
             if (oItem instanceof Item)  rssItem  = (Item)  oItem;
             if (oItem instanceof Entry) atomItem = (Entry) oItem;
             System.out.println("title: " + entry.getTitle()); 
@@ -92,17 +97,58 @@ public class Feed2Text {
                 SyndCategoryImpl category = (SyndCategoryImpl) oo;
                 System.out.println("tag: " + category.getName());
             }
-            if (oItem != null) System.out.println("wireEntry: " + oItem.toString());
             if (rssItem != null) {
                 System.out.println("rssguid: " + rssItem.getGuid());
+                System.out.println("rssDescription: " + rssItem.getDescription());
             }
             if (atomItem != null) {
-                System.out.println("atomid: " + atomItem.getId());
+                System.out.println("atomId: " + atomItem.getId());
+                System.out.println("atomSummary: " 
+                        + (atomItem.getSummary() != null ? atomItem.getSummary() : ""));
+//                for (Object oModule : atomItem.getModules()) {
+//                    System.out.println("atomModule: " + oModule.toString());
+//                }
+//                System.out.println("atomMarkup: " + atomItem.getForeignMarkup().toString());
             }
-//            for (Object olink : entry.getLinks()) {
-//                SyndLinkImpl link = (SyndLinkImpl)olink;
-//                System.out.println("url: " + link.getHref());
+//            for (Object oModule : entry.getModules()) {
+//                System.out.println("module: " + oModule.toString());
 //            }
+            for (Object olink : entry.getLinks()) {
+                SyndLinkImpl link = (SyndLinkImpl)olink;
+                System.out.println("link: " + link.getHref());
+            }
+            // System.out.println("markup: " + entry.getForeignMarkup().toString());
+            List mList = (List)entry.getForeignMarkup();
+            for (Object oMarkup : mList) {
+//                System.out.println("markup: " + oMarkup.toString());
+                if (oMarkup instanceof Element) {
+                    Element elem = (Element)oMarkup;
+                    if (elem.getNamespace().getPrefix().equals("media") && elem.getName().equals("group")) {
+                        for (Object oChild : elem.getChildren()) {
+//                            System.out.println("media:group:child " + oChild.toString());
+                            if (oChild instanceof Element) {
+                                Element chElem = (Element)oChild;
+                                if (chElem.getName().equals("thumbnail") && chElem.getNamespacePrefix().equals("media")) {
+                                    System.out.println("mediaThumbnail: url=" + chElem.getAttributeValue("url") 
+                                            +" height="+ chElem.getAttributeValue("height") 
+                                            +" width="+ chElem.getAttributeValue("width") +" ");
+                                }
+                                if (chElem.getName().equals("title") && chElem.getNamespacePrefix().equals("media")) {
+                                    System.out.println("mediaTitle: " + chElem.getText());
+                                }
+                                if (chElem.getName().equals("description") && chElem.getNamespacePrefix().equals("media")) {
+                                    System.out.println("mediaDescription: " + chElem.getText());
+                                }
+                                if (chElem.getName().equals("credit") && chElem.getNamespacePrefix().equals("media")) {
+                                    System.out.println("mediaCredit: " + chElem.getText());
+                                }
+                            }
+                        }
+                    }
+//                    System.out.println("element-name: "+ elem.getName() +" namespace: "+ elem.getNamespace().toString());
+//                    System.out.println("\t"+ elem.getValue());
+                }
+            }
             SyndContent desc = entry.getDescription();
             if (desc != null && desc.getValue().length() > 0) 
                 System.out.println("description: " + removeNewLines(desc.getValue()));
