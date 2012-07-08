@@ -20,23 +20,63 @@ import org.xml.sax.SAXException;
 public class FromText {
 
     
-    class Row {
+    public class Thumbnail {
+        public Thumbnail() {
+            this.url    = null;
+            this.width  = -1;
+            this.height = -1;
+        }
+        
+        public Thumbnail(String val) {
+            System.out.println("new Thumbnail " + val);
+            String splits[] = val.split(" ");
+            for (int i = 0; i < splits.length; i++) {
+                if (splits[i].length() > 0 && splits[i].startsWith("url=")) {
+                    this.url = splits[i].substring(4);
+                }
+                if (splits[i].length() > 0 && splits[i].startsWith("width=")) {
+                    this.width = Integer.parseInt(splits[i].substring(6));
+                }
+                if (splits[i].length() > 0 && splits[i].startsWith("height=")) {
+                    this.height = Integer.parseInt(splits[i].substring(7));
+                }
+            }
+        }
+        
+        String url;
+        int    width;
+        int    height;
+
+        @Override
+        public String toString() {
+            return " url="+ url +" width="+ Integer.toString(width) +" height="+ Integer.toString(height) +" ";
+        }
+    }
+        
+    public class Row {
+        
         public Row() {
-            this.categories     = new LinkedList<String>();
-            this.title          = null;
-            this.date           = null;
-            this.url            = null;
-            this.uri            = null;
-            this.id             = null;
-            this.description    = null;
-            this.image          = null;
-            this.youtubeUrl     = null;
-            this.enclosureUrl   = null;
-            this.enclusureMIME  = null;
+            this.categories       = new LinkedList<String>();
+            this.title            = null;
+            this.date             = null;
+            this.url              = null;
+            this.links            = new LinkedList<String>();
+            this.uri              = null;
+            this.id               = null;
+            this.description      = null;
+            this.image            = null;
+            this.youtubeUrl       = null;
+            this.enclosureUrl     = null;
+            this.enclusureMIME    = null;
+            this.mediaCredit      = null;
+            this.mediaDescription = null;
+            this.mediaTitle       = null;
+            this.thumbs           = new LinkedList<Thumbnail>();
         }
         LinkedList<String> categories;
         String title;
         String url;
+        LinkedList<String> links;
         String uri;
         String id;
         String date;
@@ -45,6 +85,10 @@ public class FromText {
         String youtubeUrl;
         String enclosureUrl;
         String enclusureMIME;
+        String mediaCredit;
+        String mediaDescription;
+        String mediaTitle;
+        LinkedList<Thumbnail> thumbs;
         
         public boolean isEmpty() {
             if (title == null || title.length() <= 0
@@ -56,9 +100,20 @@ public class FromText {
             }
         }
         
+        public void addUniqueThumbnail(Thumbnail thumb) {
+            boolean inThumbs = false;
+            System.out.println("addUniqueThumbnail " + thumb.toString());
+            for (Thumbnail t : thumbs) {
+                if (t != null && t.url.equals(thumb.url))
+                    inThumbs = true;
+            }
+            if (! inThumbs) thumbs.add(thumb);
+        }
+        
         private static final String tmpl =
             "title: @title@\n"
            +"url: @url@\n"
+           +"@links@"
            +"uri: @uri@\n"
            +"id: @id@\n"
            +"date: @date@\n"
@@ -67,8 +122,13 @@ public class FromText {
            +"youtubeUrl: @youtubeUrl@\n"
            +"enclosureUrl: @enclosureUrl@\n"
            +"enclusureMIME: @enclusureMIME@\n"
-           +"@tags@";
+           +"mediaCredit: @mediaCredit@\n"
+           +"mediaDescription: @mediaDescription@\n"
+           +"mediaTitle: @mediaTitle@\n"
+           +"@thumbs@@tags@";
         private static final String tagTmpl = "tag: @tag@\n";
+        private static final String linkTmpl = "link: @link@\n";
+        private static final String thumbsTmpl = "mediaThumbnail: @mediaThumbnail@\n";
         
         @Override
         public String toString() {
@@ -76,9 +136,18 @@ public class FromText {
             for (String tag : categories) {
                 tags += tagTmpl.replaceAll("@tag@", Matcher.quoteReplacement(tag));
             }
+            String Slinks = "";
+            for (String link : links) {
+                Slinks += linkTmpl.replaceAll("@link@", Matcher.quoteReplacement(link));
+            }
+            String thumbnails = "";
+            for (Thumbnail thumb : thumbs) {
+                thumbnails += thumbsTmpl.replaceAll("@mediaThumbnail@", Matcher.quoteReplacement(thumb.toString()));
+            }
             return tmpl
                     .replaceAll("@title@",         (title != null) ? Matcher.quoteReplacement(title) : "")
                     .replaceAll("@url@",           (url != null) ? Matcher.quoteReplacement(url) : "")
+                    .replaceAll("@links@",         Matcher.quoteReplacement(Slinks))
                     .replaceAll("@uri@",           (uri != null) ? Matcher.quoteReplacement(uri) : "")
                     .replaceAll("@id@",            (id != null) ? Matcher.quoteReplacement(id) : "")
                     .replaceAll("@date@",          (date != null) ? Matcher.quoteReplacement(date) : "")
@@ -87,7 +156,11 @@ public class FromText {
                     .replaceAll("@youtubeUrl@",    (youtubeUrl != null) ? Matcher.quoteReplacement(youtubeUrl) : "")
                     .replaceAll("@enclosureUrl@",  (enclosureUrl != null) ? Matcher.quoteReplacement(enclosureUrl) : "")
                     .replaceAll("@enclusureMIME@", (enclusureMIME != null) ? Matcher.quoteReplacement(enclusureMIME) : "")
-                    .replaceAll("@tags@", Matcher.quoteReplacement(tags));
+                    .replaceAll("@mediaCredit@",   (mediaCredit != null) ? Matcher.quoteReplacement(mediaCredit) : "")
+                    .replaceAll("@mediaDescription@", (mediaDescription != null) ? Matcher.quoteReplacement(mediaDescription) : "")
+                    .replaceAll("@mediaTitle@",    (mediaTitle != null) ? Matcher.quoteReplacement(mediaTitle) : "")
+                    .replaceAll("@thumbs@", Matcher.quoteReplacement(thumbnails))
+                    .replaceAll("@tags@",   Matcher.quoteReplacement(tags));
         }
     }
     
@@ -121,18 +194,26 @@ public class FromText {
 //                if (name.equals("userName"))       { userName               = val; }
 //                if (name.equals("userPasswd"))     { userPasswd             = val; }
 //                if (name.equals("blogId"))         { blogId                 = val; }
-                if (name.equals("tag"))            { thisRow.categories.add(val);  }
-                if (name.equals("title"))          { thisRow.title          = val; }
-                if (name.equals("url"))            { thisRow.url            = val; }
-                if (name.equals("uri"))            { thisRow.uri            = val; }
-                if (name.equals("rssguid"))        { thisRow.id             = val; }
-                if (name.equals("atomid"))         { thisRow.id             = val; }
-                if (name.equals("date"))           { thisRow.date           = val; }
-                if (name.equals("description"))    { thisRow.description    = val; }
-                if (name.equals("image"))          { thisRow.image          = val; }
-                if (name.equals("youtubeUrl"))     { thisRow.youtubeUrl     = val; }
-                if (name.equals("enclosureUrl"))   { thisRow.enclosureUrl   = val; }
-                if (name.equals("enclusureMIME"))  { thisRow.enclusureMIME  = val; }
+                if (name.equals("tag"))              { thisRow.categories.add(val);  }
+                if (name.equals("title"))            { thisRow.title            = val; }
+                if (name.equals("url"))              { thisRow.url              = val; }
+                if (name.equals("link"))             { if (!thisRow.links.contains(val)) thisRow.links.add(val);  }
+                if (name.equals("uri"))              { thisRow.uri              = val; }
+                if (name.equals("rssguid"))          { thisRow.id               = val; }
+                if (name.equals("atomid"))           { thisRow.id               = val; }
+                if (name.equals("date"))             { thisRow.date             = val; }
+                if (name.equals("description"))      { thisRow.description      = val; }
+                if (name.equals("image"))            { thisRow.image            = val; }
+                if (name.equals("youtubeUrl"))       { thisRow.youtubeUrl       = val; }
+                if (name.equals("enclosureUrl"))     { thisRow.enclosureUrl     = val; }
+                if (name.equals("enclusureMIME"))    { thisRow.enclusureMIME    = val; }
+                if (name.equals("mediaCredit"))      { thisRow.mediaCredit      = val; }
+                if (name.equals("mediaDescription")) { thisRow.mediaDescription = val; }
+                if (name.equals("mediaTitle"))       { thisRow.mediaTitle       = val; }
+                if (name.equals("mediaThumbnail")) {
+                    Thumbnail t = new Thumbnail(val);
+                    thisRow.addUniqueThumbnail(t);
+                }
             }
         }
         fr.close();
@@ -166,10 +247,28 @@ public class FromText {
                 fakeTime += 120 * 1000;  // Fake an advance of time because blogger lops off seconds
             }
             
-            String description = postBodyTemplate
+            String description = (row.description != null && row.description.length() > 0)
+                    ? row.description : null;
+            if (description == null)
+                description = (row.mediaDescription != null && row.mediaDescription.length() > 0)
+                    ? row.mediaDescription : null;
+            
+            String MC = 
+                    (row.mediaCredit != null && row.mediaCredit.length() > 0)
+                    ? mediaCreditTemplate.replaceAll("@mediaCredit@", row.mediaCredit)
+                    : null;
+            
+            String thumbs = "";
+            for (Thumbnail thumb : row.thumbs) {
+                thumbs += thumbTemplate.replaceAll("@width@", Integer.toString(thumb.width))
+                        .replaceAll("@height@", Integer.toString(thumb.height))
+                        .replaceAll("@imageurl@", thumb.url);
+            }
+            
+            String post = postBodyTemplate
                     .replaceAll("@description@", 
-                        (row.description != null && row.description.length() > 0)
-                        ? Matcher.quoteReplacement(row.description) : "")
+                        (description != null && description.length() > 0)
+                        ? Matcher.quoteReplacement(description) : "")
                     .replaceAll("@images@", 
                         (row.image != null && row.image.length() > 0)
                         ? Matcher.quoteReplacement(
@@ -183,13 +282,15 @@ public class FromText {
                         : ""
                     )
                     .replaceAll("@url@", Matcher.quoteReplacement(row.url))
+                    .replaceAll("@thumbnails@", Matcher.quoteReplacement(thumbs))
+                    .replaceAll("@mediaCredit@", MC != null ? Matcher.quoteReplacement(MC) : "")
                     .replaceAll("@enclosures@", 
                         (row.enclosureUrl != null && row.enclosureUrl.length() > 0)
                         ? generateEnclosurePlayer(row.enclosureUrl, row.enclusureMIME)
                         : ""
                     );
-            IEntry post = blog.createPost(row.title,
-                    description,
+            IEntry Ipost = blog.createPost(row.title,
+                    post,
                     row.categories,
                     false, publ, publ);
             
@@ -198,12 +299,17 @@ public class FromText {
         }
     }
     
+    // Row data fields not appearing in post templates:
+    // 
+    //    links, mediaTitle
+    
     static final String postBodyTemplate =
             "<p>@description@</p>\n"
            +"@images@\n"
            +"@youtube@\n"
            +"@enclosures@\n"
-           +"<p><a href=\"@url@\">@url@</a></p>\n";
+           +"<p><a href=\"@url@\">@url@</a></p>\n"
+           +"@thumbnails@@mediaCredit@\n";
     
     static final String postTemplate =
             "<p><b>@title@</b></p>\n"
@@ -212,6 +318,7 @@ public class FromText {
            +"@youtube@\n"
            +"@enclosures@\n"
            +"<p><span style=\"font-size: x-small;\"><a href=\"@url@\">@url@</a></span></p>\n"
+           +"@mediaCredit@\n"
            +"<br/><br/>\n";
     
     static final String postTemplate2 =
@@ -221,7 +328,11 @@ public class FromText {
            +"@youtube@\n"
            +"@enclosures@\n"
            +"<p><a href=\"@url@\">@url@</a></p>\n"
+           +"@mediaCredit@\n"
            +"<br/><br/>\n";
+    
+    static final String thumbTemplate = "<p><img width='@width' height='@height' src=\"@imageurl@\"/></p>";
+    static final String mediaCreditTemplate = "<p>Credit: @mediaCredit@</p>\n";
     
     static final String enclosureAudioTemplate = ""; // TODO audio enclosure template
     static final String enclosureVideoTemplate = ""; // TODO video enclosure template
@@ -241,13 +352,26 @@ public class FromText {
             if (row.image != null && row.image.length() > 0) {
                 img = Matcher.quoteReplacement(imageTemplate.replaceAll("@imageurl@", row.image));
             }
+            
+            String description = (row.description != null && row.description.length() > 0)
+                    ? row.description : null;
+            if (description == null)
+                description = (row.mediaDescription != null && row.mediaDescription.length() > 0)
+                    ? row.mediaDescription : null;
+            
+            String MC = 
+                    (row.mediaCredit != null && row.mediaCredit.length() > 0)
+                    ? mediaCreditTemplate.replaceAll("@mediaCredit@", row.mediaCredit)
+                    : null;
+            
             out.println("");
             out.println(
                     postTemplate.replaceAll("@title@", Matcher.quoteReplacement(row.title))
                         .replaceAll("@description@",  
-                            (row.description != null && row.description.length() > 0)
-                            ? Matcher.quoteReplacement(row.description) : "")
+                            (description != null && description.length() > 0)
+                            ? Matcher.quoteReplacement(description) : "")
                         .replaceAll("@url@", Matcher.quoteReplacement(row.url))
+                        .replaceAll("@mediaCredit@", MC != null ? Matcher.quoteReplacement(MC) : "")
                         .replaceAll("@images@", img)
                         .replaceAll("@youtube@", 
                             (row.youtubeUrl != null && row.youtubeUrl.length() > 0)
@@ -281,6 +405,7 @@ public class FromText {
     String generateYoutubeIframe(String youtubeUrl)
         throws java.net.MalformedURLException
     {
+        System.out.println("generateYoutubeIframe " + youtubeUrl);
         URL url = new URL(youtubeUrl);
         String qry = url.getQuery();
         if (qry == null || qry.length() <= 0) {
@@ -290,6 +415,7 @@ public class FromText {
         for (int i = 0; i < splits.length; i++) {
             if (splits[i].startsWith("v=")) {
                 String code = splits[i].substring(2);
+                System.out.println("\t youtube code=" + code);
                 return Matcher.quoteReplacement(
                         youtubeTemplate.replaceAll("@code@", Matcher.quoteReplacement(code))
                         );
