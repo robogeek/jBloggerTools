@@ -28,7 +28,6 @@ public class FromText {
         }
         
         public Thumbnail(String val) {
-            System.out.println("new Thumbnail " + val);
             String splits[] = val.split(" ");
             for (int i = 0; i < splits.length; i++) {
                 if (splits[i].length() > 0 && splits[i].startsWith("url=")) {
@@ -102,7 +101,6 @@ public class FromText {
         
         public void addUniqueThumbnail(Thumbnail thumb) {
             boolean inThumbs = false;
-            System.out.println("addUniqueThumbnail " + thumb.toString());
             for (Thumbnail t : thumbs) {
                 if (t != null && t.url.equals(thumb.url))
                     inThumbs = true;
@@ -405,7 +403,7 @@ public class FromText {
     String generateYoutubeIframe(String youtubeUrl)
         throws java.net.MalformedURLException
     {
-        System.out.println("generateYoutubeIframe " + youtubeUrl);
+//        System.out.println("generateYoutubeIframe " + youtubeUrl);
         URL url = new URL(youtubeUrl);
         String qry = url.getQuery();
         if (qry == null || qry.length() <= 0) {
@@ -415,7 +413,7 @@ public class FromText {
         for (int i = 0; i < splits.length; i++) {
             if (splits[i].startsWith("v=")) {
                 String code = splits[i].substring(2);
-                System.out.println("\t youtube code=" + code);
+//                System.out.println("\t youtube code=" + code);
                 return Matcher.quoteReplacement(
                         youtubeTemplate.replaceAll("@code@", Matcher.quoteReplacement(code))
                         );
