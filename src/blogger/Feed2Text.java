@@ -115,7 +115,11 @@ public class Feed2Text {
 //            }
             for (Object olink : entry.getLinks()) {
                 SyndLinkImpl link = (SyndLinkImpl)olink;
-                System.out.println("link: " + link.getHref());
+                String href = link.getHref();
+                System.out.println("link: " + href);
+                if (href.matches(".*www.youtube.com/watch.*")) {
+                    System.out.println("youtubeUrl: " + href);
+                }
             }
             // System.out.println("markup: " + entry.getForeignMarkup().toString());
             List mList = (List)entry.getForeignMarkup();
