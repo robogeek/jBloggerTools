@@ -91,7 +91,7 @@ public class FromText {
         
         public boolean isEmpty() {
             if (title == null || title.length() <= 0
-             || url   == null || url.length() <= 0
+             /*|| url   == null || url.length() <= 0 */
              /*|| description == null || description.length() <= 0*/) {
                 return true;
             } else {
@@ -229,7 +229,7 @@ public class FromText {
         throws com.google.gdata.util.ServiceException, java.io.IOException,
             java.net.MalformedURLException, ParseException
     {
-        long fakeTime = new Date().getTime() - (1000 * 60 * 30); // start fake time 30 minutes ago
+        long fakeTime = new Date().getTime() - (1000 * 60 * 120); // start fake time 120 minutes ago
         for (Row row = rows.peekLast(); row != null; row = rows.peekLast()) {
             DateTime publ;
             
@@ -238,7 +238,7 @@ public class FromText {
                 String[] dates = row.date.split(" ");
                 Date date = new Date(new Long(dates[0]));
                 publ = new DateTime(date);
-                publ.setTzShift(new Integer(dates[1]));
+                publ.setTzShift(dates.length >= 2 ? new Integer(dates[1]) : 0);
             } else {
                 publ = new DateTime(fakeTime);
                 publ.setTzShift(0);
@@ -279,7 +279,10 @@ public class FromText {
                         ? generateYoutubeIframe(row.youtubeUrl)
                         : ""
                     )
-                    .replaceAll("@url@", Matcher.quoteReplacement(row.url))
+                    .replaceAll("@url@", 
+                        (row.url != null && row.url.length() > 0)
+                        ? Matcher.quoteReplacement(linkTemplate.replaceAll("@url@", row.url))
+                        : "")
                     .replaceAll("@thumbnails@", Matcher.quoteReplacement(thumbs))
                     .replaceAll("@mediaCredit@", MC != null ? Matcher.quoteReplacement(MC) : "")
                     .replaceAll("@enclosures@", 
@@ -306,8 +309,9 @@ public class FromText {
            +"@images@\n"
            +"@youtube@\n"
            +"@enclosures@\n"
-           +"<p><a href=\"@url@\">@url@</a></p>\n"
-           +"@thumbnails@@mediaCredit@\n";
+           +"@url@\n"
+           +"@thumbnails@\n"
+           +"@mediaCredit@\n";
     
     static final String postTemplate =
             "<p><b>@title@</b></p>\n"
@@ -315,20 +319,22 @@ public class FromText {
            +"@images@\n"
            +"@youtube@\n"
            +"@enclosures@\n"
-           +"<p><span style=\"font-size: x-small;\"><a href=\"@url@\">@url@</a></span></p>\n"
+           +"@url@\n"
            +"@mediaCredit@\n"
            +"<br/><br/>\n";
     
-    static final String postTemplate2 =
-            "<p><b>@title@</b></p>\n"
-           +"<p>@description@</p>\n"
-           +"@images@\n"
-           +"@youtube@\n"
-           +"@enclosures@\n"
-           +"<p><a href=\"@url@\">@url@</a></p>\n"
-           +"@mediaCredit@\n"
-           +"<br/><br/>\n";
+//    static final String postTemplate2 =
+//            "<p><b>@title@</b></p>\n"
+//           +"<p>@description@</p>\n"
+//           +"@images@\n"
+//           +"@youtube@\n"
+//           +"@enclosures@\n"
+//           +"<p><a href=\"@url@\">@url@</a></p>\n"
+//           +"@mediaCredit@\n"
+//           +"<br/><br/>\n";
     
+    static final String linkTemplate  = "<p><a href=\"@url@\">@url@</a></p>\n";
+    static final String smLinkTemplate  = "<p><span style='font-size: x-small;'><a href=\"@url@\">@url@</a></span></p>\n";
     static final String thumbTemplate = "<p><img width='@width' height='@height' src=\"@imageurl@\"/></p>";
     static final String mediaCreditTemplate = "<p>Credit: @mediaCredit@</p>\n";
     
@@ -368,7 +374,10 @@ public class FromText {
                         .replaceAll("@description@",  
                             (description != null && description.length() > 0)
                             ? Matcher.quoteReplacement(description) : "")
-                        .replaceAll("@url@", Matcher.quoteReplacement(row.url))
+                        .replaceAll("@url@", 
+                            (row.url != null && row.url.length() > 0)
+                            ? Matcher.quoteReplacement(smLinkTemplate.replaceAll("@url@", row.url))
+                            : "")
                         .replaceAll("@mediaCredit@", MC != null ? Matcher.quoteReplacement(MC) : "")
                         .replaceAll("@images@", img)
                         .replaceAll("@youtube@", 
