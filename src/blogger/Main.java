@@ -27,6 +27,7 @@ public class Main {
             FileNotFoundException, ParseException
     {
         if (args.length > 0 && args[0].equals("fromtext")) FromText.main(args);
+        else if (args.length > 0 && args[0].equals("counttext")) new FromText().countItems(args[1]);
         else if (args.length > 0 && args[0].equals("feed2text")) Feed2Text.main(args);
         else if (args.length > 0 && args[0].equals("listblogs")) ListBlogs.main(args);
         else if (args.length > 0 && args[0].equals("drupalcvt")) Converter.main(args);

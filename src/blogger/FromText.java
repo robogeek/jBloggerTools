@@ -184,6 +184,11 @@ public class FromText {
     LinkedList<Row> rows   = null;
     LinkedList<Row> posted = null;
     
+    public FromText() {
+        rows   = new LinkedList<Row>();
+        posted = new LinkedList<Row>();
+    }
+    
     private void parseText(File inputFile)
         throws java.io.FileNotFoundException, java.io.IOException
     {
@@ -202,7 +207,7 @@ public class FromText {
                 }
                 continue;
             }
-            //System.out.println(line);
+//            System.out.println(line);
             int colon = line.indexOf(":");
             if (colon > 0) {
                 String name = line.substring(0, colon);
@@ -490,8 +495,6 @@ public class FromText {
         BloggerService service = new BloggerService("exampleCo-exampleApp-1");
         service.setUserCredentials(userName, userPasswd);
         Blog blog = new Blog(service, blogId, authorName, userName);
-        rows   = new LinkedList<Row>();
-        posted = new LinkedList<Row>();
         parseText(new File(inputFile)); 
         try { 
             postIndividually(blog); 
@@ -502,6 +505,12 @@ public class FromText {
         
         if (postedFile != null) postSummary(postedFile);
         if (notPostedFile != null) notPostedSummary(notPostedFile);
+    }
+    
+    public void countItems(String fn) throws FileNotFoundException, IOException {
+        parseText(new File(fn));
+        System.out.println("input file: " + fn); 
+        System.out.println("number of items: " + Integer.toString(rows.size()));
     }
     
     public static void main(String[] args) 
