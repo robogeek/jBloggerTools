@@ -5,13 +5,7 @@
 package blogger;
 
 import com.google.gdata.client.blogger.BloggerService;
-import com.google.gdata.data.Category;
-import com.google.gdata.data.DateTime;
-import com.google.gdata.data.Entry;
-import com.google.gdata.data.Feed;
-import com.google.gdata.data.IEntry;
-import com.google.gdata.data.Person;
-import com.google.gdata.data.PlainTextConstruct;
+import com.google.gdata.data.*;
 import com.google.gdata.data.blogger.BlogEntry;
 import com.google.gdata.util.ServiceException;
 import java.io.IOException;
@@ -79,7 +73,28 @@ public class Blog {
 
         // Ask the service to insert the new entry
         URL postUrl = MetaData.createPostFeedURL(blogId);
-        return service.insert(postUrl, entry);
+        
+        boolean posted;
+        IEntry ientry = null;
+        do {
+            try {
+                ientry = service.insert(postUrl, entry);
+                // we only get here if there are no exceptions thrown
+                // indicating SUCCESSFUL posting 
+                posted = true;  // in case posted became false because of an exception
+            } catch (com.google.gdata.util.ServiceException se) {
+                System.err.println("Caught exception " + se.getMessage());
+                posted = false;
+                try {
+                    // The exception may be due to blogger being overloaded
+                    // sleep to give time for blogger to catch up .. maybe ..?
+                    Thread.sleep(10 * 1000);
+                } catch (InterruptedException ex) {
+                    // ignore
+                }
+            }
+        } while (!posted);
+        return ientry;
     }
 
     public IEntry createPost(String title, String content, Boolean isDraft)
