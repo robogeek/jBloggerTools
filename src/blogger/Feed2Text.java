@@ -95,7 +95,9 @@ public class Feed2Text {
             System.out.println("uri: " + entry.getUri());
             for (Object oo : entry.getCategories()) {
                 SyndCategoryImpl category = (SyndCategoryImpl) oo;
-                System.out.println("tag: " + category.getName());
+                String tagName = category.getName();
+                if (tagName.startsWith("http:")) continue;
+                System.out.println("tag: " + tagName);
             }
             if (rssItem != null) {
                 System.out.println("rssguid: " + rssItem.getGuid());
