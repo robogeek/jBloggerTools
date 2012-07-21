@@ -23,7 +23,7 @@ This is real simple
     java -jar dist/jBloggerTools.jar feed2text URL
     java -jar dist/jBloggerTools.jar feed2text URL hours
 
-The feed content is printed on the standard output gets.  
+The feed content is printed on the standard output.  The 'hours' argument tosses away any item older than the number of hours specified.  
 
 Posting to a Blogger Blog
 =========================
