@@ -84,6 +84,19 @@ public class Blog {
                 posted = true;  // in case posted became false because of an exception
             } catch (com.google.gdata.util.ServiceException se) {
                 System.err.println("Caught exception " + se.getMessage());
+                System.err.println("Response body " + se.getResponseBody());
+                System.err.println("Code name " + se.getCodeName());
+                System.err.println("Debug info " + se.getDebugInfo());
+                System.err.println("Domain name " + se.getDomainName());
+                System.err.println("Extended help " + se.getExtendedHelp());
+                System.err.println("Internal reason " + se.getInternalReason());
+                System.err.println("Location " + se.getLocation());
+                System.err.println("string: " + se.toString());
+                // se.printStackTrace();
+                if (se.getResponseBody().contains("exceeded rate limit")) {
+                    System.err.println("ERROR ERROR - you've exceeded the rate limit of 50 postings");
+                    throw se;
+                }
                 posted = false;
                 try {
                     // The exception may be due to blogger being overloaded
