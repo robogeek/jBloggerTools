@@ -57,7 +57,7 @@ The important tags follow.  There are several more available, but these are the 
 
     title: Title String
 
-Gives the title of the blog post
+Gives the title of the blog post.  The title tag is required.
 
     date: #### ###
 
@@ -65,23 +65,23 @@ Let's you specify a date for the post.  The date must be two integers, the first
 
     description: A paragraph of description text.  Can contain HTML code.
 
-Whatever you put here is simply dumped into the output, surrounded by paragraph tags.  This line can appear more than once to have multiple paragraphs of text.
+Whatever you put here is simply dumped into the output, surrounded by paragraph tags. This is optional, and can appear zero or more times.  Multiple description: tags turn into multiple paragraphs of text.
 
     tag: Tag Name
 
-This attaches what Blogger calls a Label to the blog post.  You can of course list multiple tag: lines, and each one is converted into a Label.
+This attaches what Blogger calls a Label to the blog post.  You can of course list multiple tag: lines, and each one is converted into a Label. This is optional, and can appear zero or more times. 
 
     url: URL
 
-Attaches a link to the end of the blog post.  You can only specify the URL, not the anchor text, nor any of the rel= options.
+Attaches a link to the end of the blog post. This is optional, and can appear zero or more times. You can only specify the URL, not the anchor text, nor any of the rel= options.
 
     youtubeUrl: URL
 
-Constructs an embed code to play the video referenced in the URL.  The URL must be a youtube URL, pointing at the page for a given video.  The code for the video is extracted from the URL and used to construct the player.
+Constructs the embed code to play the video referenced in the URL.  This is optional, and currently only one youtubeUrl: line can be used.  The URL must be a youtube URL, pointing at the page for a given video.  The code for the video is extracted from the URL and used to construct the player.
 
     image: URL
 
-Constructs an img tag to include the image.
+Constructs an img tag to include the image. This is optional, and can appear zero or more times.
 
 
 
