@@ -46,6 +46,16 @@ The postSummaryFile has an HTML summary of what was posted written to it.
 
 The notPostedFile gets a list of the items which were not posted.  If all goes well this file will be empty.  However if an error occurs, the error is trapped, the unposted entries go into this file, and then the error is rethrown.
 
+Counting the number of items in a blog text file
+================================================
+
+    java -jar dist/jBloggerTools.jar counttext inputFile
+
+Generating an HTML summary of items in a blog text file
+=======================================================
+
+    java -jar dist/jBloggerTools.jar summary inputFile summaryFile
+
 Text format to represent blog posts
 ===================================
 

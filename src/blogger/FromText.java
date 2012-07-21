@@ -543,6 +543,14 @@ public class FromText {
         System.out.println("number of items: " + Integer.toString(rows.size()));
     }
     
+    public void generateSummary(String fnIn, String fnOut) 
+        throws FileNotFoundException, IOException 
+    {
+        parseText(new File(fnIn));
+        posted = rows;
+        postSummary(fnOut);
+    }
+    
     public static void main(String[] args) 
             throws ParserConfigurationException, SAXException, IOException,
             AuthenticationException, ServiceException, 
