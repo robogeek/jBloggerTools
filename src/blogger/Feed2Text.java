@@ -100,8 +100,8 @@ public class Feed2Text {
                 System.out.println("tag: " + tagName);
             }
             if (rssItem != null) {
-                System.out.println("rssguid: " + rssItem.getGuid());
-                System.out.println("rssDescription: " + rssItem.getDescription());
+                System.out.println("rssguid: " + removeNewLines(rssItem.getGuid().toString()));
+                // System.out.println("rssDescription: " + rssItem.getDescription());
             }
             if (atomItem != null) {
                 System.out.println("atomId: " + atomItem.getId());
