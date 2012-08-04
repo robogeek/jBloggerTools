@@ -294,12 +294,12 @@ public class FromText {
             
             String urls = "";
             for (String url : row.urls) {
-                urls += linkTemplate.replaceAll("@url@", url);
+                urls += linkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url));
             }
             
             String Sdesc = "";
             for (String desc : row.descriptions) {
-                Sdesc += descriptTemplate.replaceAll("@description@", desc);
+                Sdesc += descriptTemplate.replaceAll("@description@", Matcher.quoteReplacement(desc));
             }
             if (Sdesc == null)
                 Sdesc = (row.mediaDescription != null && row.mediaDescription.length() > 0)
@@ -307,19 +307,19 @@ public class FromText {
             
             String MC = 
                     (row.mediaCredit != null && row.mediaCredit.length() > 0)
-                    ? mediaCreditTemplate.replaceAll("@mediaCredit@", row.mediaCredit)
+                    ? mediaCreditTemplate.replaceAll("@mediaCredit@", Matcher.quoteReplacement(row.mediaCredit))
                     : null;
             
             String images = "";
             for (String imgsrc : row.images) {
-                images += imageTemplate.replaceAll("@imageurl@", imgsrc);
+                images += imageTemplate.replaceAll("@imageurl@", Matcher.quoteReplacement(imgsrc));
             }
             
             String thumbs = "";
             for (Thumbnail thumb : row.thumbs) {
                 thumbs += thumbTemplate.replaceAll("@width@", Integer.toString(thumb.width))
                         .replaceAll("@height@", Integer.toString(thumb.height))
-                        .replaceAll("@imageurl@", thumb.url);
+                        .replaceAll("@imageurl@", Matcher.quoteReplacement(thumb.url));
             }
             
             String post = postBodyTemplate
@@ -364,7 +364,7 @@ public class FromText {
            +"@mediaCredit@\n";
     
     static final String postTemplate =
-            "<p><b>@title@</b></p>\n"
+            "<h3>@title@</b></h3>\n"
            +"@descriptions@\n"
            +"@images@\n"
            +"@youtube@\n"
@@ -405,7 +405,7 @@ public class FromText {
             posted.remove(row);
             String images = "";
             for (String imgsrc : row.images) {
-                images += imageTemplate.replaceAll("@imageurl@", imgsrc);
+                images += imageTemplate.replaceAll("@imageurl@", Matcher.quoteReplacement(imgsrc));
             }
             
             String description = (row.descriptions != null && row.descriptions.size() > 0)
@@ -416,12 +416,12 @@ public class FromText {
             
             String MC = 
                     (row.mediaCredit != null && row.mediaCredit.length() > 0)
-                    ? mediaCreditTemplate.replaceAll("@mediaCredit@", row.mediaCredit)
+                    ? mediaCreditTemplate.replaceAll("@mediaCredit@", Matcher.quoteReplacement(row.mediaCredit))
                     : null;
             
             String urls = "";
             for (String url : row.urls) {
-                urls += smLinkTemplate.replaceAll("@url@", url);
+                urls += smLinkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url));
             }
             
             out.println("");
@@ -432,14 +432,14 @@ public class FromText {
                             ? Matcher.quoteReplacement(description) : "")
                         .replaceAll("@urls@", Matcher.quoteReplacement(urls))
                         .replaceAll("@mediaCredit@", MC != null ? Matcher.quoteReplacement(MC) : "")
-                        .replaceAll("@images@", images)
+                        .replaceAll("@images@", Matcher.quoteReplacement(images))
                         .replaceAll("@youtube@", 
                             (row.youtubeUrl != null && row.youtubeUrl.length() > 0)
-                            ? generateYoutubeIframe(row.youtubeUrl)
+                            ? Matcher.quoteReplacement(generateYoutubeIframe(row.youtubeUrl))
                             : "")
                         .replaceAll("@enclosures@", 
                             (row.enclosureUrl != null && row.enclosureUrl.length() > 0)
-                            ? generateEnclosurePlayer(row.enclosureUrl, row.enclusureMIME)
+                            ? Matcher.quoteReplacement(generateEnclosurePlayer(row.enclosureUrl, row.enclusureMIME))
                             : ""
                         )
                     );
@@ -503,7 +503,7 @@ public class FromText {
     void run(String[] args) 
             throws ParserConfigurationException, SAXException, IOException,
             AuthenticationException, ServiceException, java.io.FileNotFoundException,
-            java.net.MalformedURLException, ParseException {
+            java.net.MalformedURLException, ParseException, Exception {
         
         authorName = args[1];
         userName   = args[2];
@@ -523,7 +523,33 @@ public class FromText {
         System.out.println("not posted file: " + notPostedFile);
         
         BloggerService service = new BloggerService("exampleCo-exampleApp-1");
-        service.setUserCredentials(userName, userPasswd);
+        boolean notAuthenticated = true;
+        for (int i = 0; i < 5 && notAuthenticated; i++) {
+            try {
+                service.setUserCredentials(userName, userPasswd);
+                notAuthenticated = false; // we only get here if there's no exception
+            } catch (com.google.gdata.util.AuthenticationException ae) {
+                System.out.println("CAUGHT EXCEPTION AuthenticationException "+ ae.getMessage());
+                System.err.println("Response body " + ae.getResponseBody());
+                System.err.println("Code name " + ae.getCodeName());
+                System.err.println("Debug info " + ae.getDebugInfo());
+                System.err.println("Domain name " + ae.getDomainName());
+                System.err.println("Extended help " + ae.getExtendedHelp());
+                System.err.println("Internal reason " + ae.getInternalReason());
+                System.err.println("Location " + ae.getLocation());
+                System.err.println("string: " + ae.toString());
+                try {
+                    // The exception may be due to blogger being overloaded
+                    // sleep to give time for blogger to catch up .. maybe ..?
+                    Thread.sleep(10 * 1000);
+                } catch (InterruptedException ex) {
+                    // ignore
+                }
+            }
+        }
+        if (notAuthenticated) {
+            throw new Exception("Blog service did not authenticate.");
+        }
         Blog blog = new Blog(service, blogId, authorName, userName);
         parseText(new File(inputFile)); 
         try { 
@@ -554,7 +580,7 @@ public class FromText {
     public static void main(String[] args) 
             throws ParserConfigurationException, SAXException, IOException,
             AuthenticationException, ServiceException, 
-            java.io.FileNotFoundException, MalformedURLException, ParseException {
+            java.io.FileNotFoundException, MalformedURLException, ParseException, Exception {
         new FromText().run(args);
     }
 }
