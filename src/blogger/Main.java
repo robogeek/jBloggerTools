@@ -24,18 +24,21 @@ public class Main {
             throws ParserConfigurationException, SAXException, IOException,
             AuthenticationException, ServiceException,
             MalformedURLException, IllegalArgumentException, FeedException,
-            FileNotFoundException, ParseException
+            FileNotFoundException, ParseException, Exception
     {
         if (args.length > 0 && args[0].equals("fromtext")) FromText.main(args);
         else if (args.length > 0 && args[0].equals("counttext")) new FromText().countItems(args[1]);
+        else if (args.length > 0 && args[0].equals("summary")) new FromText().generateSummary(args[1], args[2]);
         else if (args.length > 0 && args[0].equals("feed2text")) Feed2Text.main(args);
         else if (args.length > 0 && args[0].equals("listblogs")) ListBlogs.main(args);
         else if (args.length > 0 && args[0].equals("drupalcvt")) Converter.main(args);
         else {
-            System.err.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
-            System.err.println("USAGE - Main feed2text feedUrl");
-            System.err.println("USAGE - Main listblogs userName userPasswd");
-            System.err.println("USAGE - Main drupalcvt");
+            System.out.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
+            System.out.println("USAGE - Main feed2text feedUrl");
+            System.out.println("USAGE - Main counttext inputFile");
+            System.out.println("USAGE - Main summary inputFile summaryFile");
+            System.out.println("USAGE - Main listblogs userName userPasswd");
+            System.out.println("USAGE - Main drupalcvt");
         }
     }
     
