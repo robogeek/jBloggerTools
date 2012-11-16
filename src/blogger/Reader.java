@@ -3,6 +3,7 @@ package blogger;
 
 
 import com.google.gdata.client.GoogleService;
+import java.io.PrintStream;
 import java.io.OutputStreamWriter;
 import java.io.InputStreamReader;
 import java.io.InputStream;
@@ -68,6 +69,11 @@ public class Reader {
     {
         String userName   = args[1];
         String userPasswd = args[2];
+        String outfn      = args.length >= 4 ? args[3] : "-";
+        PrintStream out = System.out;
+        if (outfn != null && ! outfn.equals("-")) {
+            out = new PrintStream(outfn);
+        }
         String token = getAuthToken(userName, userPasswd);
         
         // https://www.google.com/reader/api/0/tag/list?output=json&ck=116900000&client=gooberitis
@@ -81,8 +87,8 @@ public class Reader {
         JSONArray tags = jso.getJSONArray("tags");
         for (int i = 0; i < tags.length(); i++) {
             JSONObject elem = tags.getJSONObject(i);
-            //System.out.println(elem.toString());
-            System.out.println(elem.getString("id"));
+            //out.println(elem.toString());
+            out.println(elem.getString("id"));
         }
     }
     
@@ -93,6 +99,11 @@ public class Reader {
         String userName   = args[1];
         String userPasswd = args[2];
         String query      = args[3];
+        String outfn      = args.length >= 5 ? args[4] : "-";
+        PrintStream out = System.out;
+        if (outfn != null && ! outfn.equals("-")) {
+            out = new PrintStream(outfn);
+        }
         String token = getAuthToken(userName, userPasswd);
         
         // https://www.google.com/reader/api/0/tag/list?output=json&ck=116900000&client=gooberitis
@@ -102,7 +113,7 @@ public class Reader {
         String json = dataForUrl(url, token);
         
         JSONObject jso = new JSONObject(json);
-        System.out.println(jso.toString(4));
+        out.println(jso.toString(4));
         
 //        JSONArray tags = jso.getJSONArray("tags");
 //        for (int i = 0; i < tags.length(); i++) {
@@ -122,6 +133,7 @@ public class Reader {
         String userName   = args[1];
         String userPasswd = args[2];
         String tagName    = args[3];
+        String outfn      = args.length >= 5 ? args[4] : "-";
         String token = getAuthToken(userName, userPasswd);
         //System.out.println(token);
         
@@ -136,7 +148,7 @@ public class Reader {
         URL url = new URL(sUrl);
         String json = dataForUrl(url, token);
         
-        printFeed2Text(new JSONObject(json));
+        printFeed2Text(new JSONObject(json), outfn);
         
         /*JSONObject jso = new JSONObject(json);
         System.out.println(jso.toString(4));*/
@@ -153,6 +165,7 @@ public class Reader {
         String userName   = args[1];
         String userPasswd = args[2];
         String feed       = args[3];
+        String outfn      = args.length >= 5 ? args[4] : "-";
         String token = getAuthToken(userName, userPasswd);
         //System.out.println(token);
         
@@ -167,7 +180,7 @@ public class Reader {
         URL url = new URL(sUrl);
         String json = dataForUrl(url, token);
         
-        printFeed2Text(new JSONObject(json));
+        printFeed2Text(new JSONObject(json), outfn);
         
         /*JSONObject jso = new JSONObject(json);
         System.out.println(jso.toString(4));*/
@@ -182,6 +195,7 @@ public class Reader {
         
         String userName   = args[1];
         String userPasswd = args[2];
+        String outfn      = args.length >= 4 ? args[3] : "-";
         String token = getAuthToken(userName, userPasswd);
         //System.out.println(token);
         
@@ -196,42 +210,45 @@ public class Reader {
         URL url = new URL(sUrl);
         String json = dataForUrl(url, token);
         
-        printFeed2Text(new JSONObject(json));
+        printFeed2Text(new JSONObject(json), outfn);
         
     }
     
-    static void printFeed2Text(JSONObject feed)  
+    static void printFeed2Text(JSONObject feed, String outfn)  
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
     {
-        
+        PrintStream out = System.out;
+        if (outfn != null && ! outfn.equals("-")) {
+            out = new PrintStream(outfn);
+        }
         JSONArray items = feed.getJSONArray("items");
         for (int i = 0; i < items.length(); i++) {
             JSONObject item = items.getJSONObject(i);
             //System.out.println(elem.toString());
             //System.out.println(elem.getString("id"));
-            System.out.println("");
+            out.println("");
             //System.out.println(item.toString(4));
             //System.out.println("");
-            System.out.println("title: " + item.getString("title"));
+            out.println("title: " + item.getString("title"));
             
             JSONObject summary =  null;
             try { summary = item.getJSONObject("summary"); } catch (Exception e) { summary = null; }
             if (summary != null)
-                try { System.out.println("description: " + Feed2Text.removeNewLines(summary.getString("content"))); } catch (Exception e) { }
+                try { out.println("description: " + Feed2Text.removeNewLines(summary.getString("content"))); } catch (Exception e) { }
             
             JSONObject content = null;
             try { content = item.getJSONObject("content"); } catch (Exception e) { content = null; }
             if (content != null) 
-                try { System.out.println("description: " + Feed2Text.removeNewLines(content.getString("content"))); } catch (Exception e) { }
+                try { out.println("description: " + Feed2Text.removeNewLines(content.getString("content"))); } catch (Exception e) { }
             
             JSONObject origin = null;
             try { origin = item.getJSONObject("origin"); } catch (Exception e) { origin = null; }
             if (origin != null) 
                 try {
-                    System.out.println("originUrl: " + origin.getString("htmlUrl"));
-                    System.out.println("originTitle: " + origin.getString("title"));
-                    System.out.println("originStreamId: " + origin.getString("streamId"));
+                    out.println("originUrl: " + origin.getString("htmlUrl"));
+                    out.println("originTitle: " + origin.getString("title"));
+                    out.println("originStreamId: " + origin.getString("streamId"));
                 } catch (Exception e) { }
             
             JSONArray alternate = null;
@@ -239,7 +256,7 @@ public class Reader {
             for (int altno = 0; alternate != null && altno < alternate.length(); altno++) {
                 try {
                     JSONObject alt = alternate.getJSONObject(altno);
-                    System.out.println("url: " + alt.getString("href"));
+                    out.println("url: " + alt.getString("href"));
                 } catch (Exception e) { }
             }
             
@@ -248,7 +265,7 @@ public class Reader {
             for (int canno = 0; canonical != null && canno < canonical.length(); canno++) {
                 try {
                     JSONObject can = canonical.getJSONObject(canno);
-                    System.out.println("url: " + can.getString("href"));
+                    out.println("url: " + can.getString("href"));
                 } catch (Exception e) { }
             }
                 
@@ -257,7 +274,7 @@ public class Reader {
                 String cat = categories.getString(catno);
                 if (cat.matches(".*.state.com.google.*")) continue;
                 if (cat.matches(".*user.*[0-9]*.label.*")) continue;
-                System.out.println("tag: " + cat);
+                out.println("tag: " + cat);
             }
             
             JSONArray enclosures = null;
@@ -265,13 +282,13 @@ public class Reader {
             for (int enclno = 0; enclosures != null && enclno < enclosures.length(); enclno++) {
                 try {
                     JSONObject encl = enclosures.getJSONObject(enclno);
-                    System.out.println("enclosureUrl: " + encl.getString("href"));
-                    System.out.println("enclusureMIME: " + encl.getString("type"));
+                    out.println("enclosureUrl: " + encl.getString("href"));
+                    out.println("enclusureMIME: " + encl.getString("type"));
                 } catch (Exception e) { }
             }
             
-            System.out.println("date: " + Long.toString(item.getLong("published")));
-            System.out.println("");
+            out.println("date: " + Long.toString(item.getLong("published")));
+            out.println("");
         }
     }
     
