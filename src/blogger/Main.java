@@ -32,6 +32,11 @@ public class Main {
         else if (args.length > 0 && args[0].equals("feed2text")) Feed2Text.main(args);
         else if (args.length > 0 && args[0].equals("listblogs")) ListBlogs.main(args);
         else if (args.length > 0 && args[0].equals("drupalcvt")) Converter.main(args);
+        else if (args.length > 0 && args[0].equals("readertags")) Reader.listTags(args);
+        else if (args.length > 0 && args[0].equals("tag")) Reader.tagEntries(args);
+        else if (args.length > 0 && args[0].equals("starred")) Reader.starred(args);
+        else if (args.length > 0 && args[0].equals("feedfinder")) Reader.feedFinder(args);
+        else if (args.length > 0 && args[0].equals("feed")) Reader.feed(args);
         else {
             System.out.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
             System.out.println("USAGE - Main feed2text feedUrl");
@@ -39,6 +44,11 @@ public class Main {
             System.out.println("USAGE - Main summary inputFile summaryFile");
             System.out.println("USAGE - Main listblogs userName userPasswd");
             System.out.println("USAGE - Main drupalcvt");
+            System.out.println("USAGE - Main readertags userName userPassword");
+            System.out.println("USAGE - Main tag userName userPassword tagName");
+            System.out.println("USAGE - Main starred userName userPassword");
+            System.out.println("USAGE - Main feedfinder userName userPassword query");
+            System.out.println("USAGE - Main feed userName userPassword feedUrl");
         }
     }
     
