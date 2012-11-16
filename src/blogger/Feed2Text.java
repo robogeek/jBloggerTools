@@ -84,12 +84,14 @@ public class Feed2Text {
             Item   rssItem  = null;
             Entry  atomItem = null;
             
+            Date publ = entry.getPublishedDate();
+            if (publ == null) publ = new Date();
+            
 //            if (oItem != null) System.out.println("wireEntry: " + oItem.toString()); 
             if (oItem instanceof Item)  rssItem  = (Item)  oItem;
             if (oItem instanceof Entry) atomItem = (Entry) oItem;
             System.out.println("title: " + entry.getTitle()); 
-            System.out.println("date: " + Long.toString(entry.getPublishedDate().getTime()) 
-                    +" "+ Long.toString(entry.getPublishedDate().getTimezoneOffset()));
+            System.out.println("date: " + Long.toString(publ.getTime()) +" "+ Long.toString(publ.getTimezoneOffset()));
                 // entry.getPublishedDate().toString());
             System.out.println("url: " + entry.getLink());
             System.out.println("uri: " + entry.getUri());
@@ -167,7 +169,9 @@ public class Feed2Text {
         }
     }
     
-    String removeNewLines(String s) {
+    // String removeNewLines(String s) { return Feed2Text.removeNewLines(s); }
+    
+    public static String removeNewLines(String s) {
         while (s.indexOf("\n") >= 0) {
             String n = s.substring(0, s.indexOf("\n")) + s.substring(s.indexOf("\n") + 1);
             s = n;
@@ -181,6 +185,8 @@ public class Feed2Text {
         if (maxAge != null) {
             Date then = entry.getPublishedDate();
             Date now = new Date();
+            if (then == null)
+                then = now;
             
             if ((now.getTime() - then.getTime()) > maxAge)
                 return false;
