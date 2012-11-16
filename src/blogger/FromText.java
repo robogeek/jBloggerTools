@@ -364,7 +364,7 @@ public class FromText {
            +"@mediaCredit@\n";
     
     static final String postTemplate =
-            "<h3>@title@</b></h3>\n"
+            "<b>@title@</b><br/>\n"
            +"@descriptions@\n"
            +"@images@\n"
            +"@youtube@\n"
@@ -459,6 +459,12 @@ public class FromText {
         }
         out.close();
     }
+    
+    // generally should move to an oEmbed based service because it can support many more services
+    //
+    // Some other examples however for Vimeo & blip.tv
+    // https://github.com/vimeo/vimeo-api-examples/blob/master/oembed/php-example.php
+    // http://wiki.blip.tv/index.php/HTML5_Player_API
     
     // http://www.youtube.com/watch?v=c1wCszOpeYk&feature=g-vrec
     // <iframe width="450" height="253" src="http://www.youtube.com/embed/c1wCszOpeYk" frameborder="0" allowfullscreen></iframe>
