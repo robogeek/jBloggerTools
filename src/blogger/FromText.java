@@ -128,11 +128,31 @@ public class FromText {
         }
         
         public void addDescription(String desc) {
-            descriptions.add(desc);
+            descriptions.add(cleanup(desc));
+        }
+        
+        public void setTitle(String title) {
+            this.title = cleanup(title);
         }
         
         public void addUrl(String url) {
             urls.add(url);
+        }
+        
+        private String cleanup(String txt) {
+            return txt
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x93 }), "-")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x94 }), "-")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x95 }), "-")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x98 }), "'")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x99 }), "'")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9a }), ",")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9c }), "\"")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9d }), "\"")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9e }), "\"")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xa6 }), "...")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xb2 }), "'")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0xa0 }), " ");
         }
         
         private static final String tmpl =
@@ -223,14 +243,15 @@ public class FromText {
             line = line.trim();
             if (line.length() <= 0) {
                 // - process previously gathered data
+                // System.out.println("EMPTY LINE row=" + thisRow.toString());
                 if (! thisRow.isEmpty()) {
                     rows.addLast(thisRow);
-//                    System.out.println("ADDED " + thisRow.toString());
+                    // System.out.println("ADDED " + thisRow.toString());
                     thisRow = new Row();
                 }
                 continue;
             }
-//            System.out.println(line);
+            // System.out.println(line);
             int colon = line.indexOf(":");
             if (colon > 0) {
                 String name = line.substring(0, colon);
@@ -240,7 +261,7 @@ public class FromText {
 //                if (name.equals("userPasswd"))     { userPasswd             = val; }
 //                if (name.equals("blogId"))         { blogId                 = val; }
                 if (name.equals("tag"))              { thisRow.addUniqueCategory(val); }
-                if (name.equals("title"))            { thisRow.title            = val; }
+                if (name.equals("title"))            { thisRow.setTitle(val);          }
                 if (name.equals("url"))              { thisRow.addUrl(val);            }
                 if (name.equals("link"))             { thisRow.addUniqueLink(val);     }
                 if (name.equals("uri"))              { thisRow.uri              = val; }

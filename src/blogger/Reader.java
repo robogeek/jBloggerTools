@@ -20,6 +20,8 @@ import org.json.JSONArray;
 import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;
 
+import java.text.Normalizer;
+
 public class Reader {
     
     static String encoded(String str) {
@@ -219,6 +221,24 @@ public class Reader {
         
     }
     
+    static String cleanup(String txt) {
+        String ret = null;
+        ret = txt.replaceAll("<iframe[^>]*>[^<]*</iframe>", "")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x93 }), "-")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x94 }), "-")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x95 }), "-")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x98 }), "'")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x99 }), "'")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9a }), ",")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9c }), "\"")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9d }), "\"")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9e }), "\"")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xa6 }), "...")
+            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xb2 }), "'")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0xa0 }), " ");
+        return ret;
+    }
+    
     static void printFeed2Text(JSONObject feed, String outfn)  
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
@@ -235,17 +255,17 @@ public class Reader {
             out.println("");
             //System.out.println(item.toString(4));
             //System.out.println("");
-            out.println("title: " + item.getString("title"));
+            out.println("title: " + cleanup(item.getString("title")));
             
             JSONObject summary =  null;
             try { summary = item.getJSONObject("summary"); } catch (Exception e) { summary = null; }
             if (summary != null)
-                try { out.println("description: " + Feed2Text.removeNewLines(summary.getString("content"))); } catch (Exception e) { }
+                try { out.println("description: " + cleanup(Feed2Text.removeNewLines(summary.getString("content")))); } catch (Exception e) { }
             
             JSONObject content = null;
             try { content = item.getJSONObject("content"); } catch (Exception e) { content = null; }
             if (content != null) 
-                try { out.println("description: " + Feed2Text.removeNewLines(content.getString("content"))); } catch (Exception e) { }
+                try { out.println("description: " + cleanup(Feed2Text.removeNewLines(content.getString("content")))); } catch (Exception e) { }
             
             JSONObject origin = null;
             try { origin = item.getJSONObject("origin"); } catch (Exception e) { origin = null; }
