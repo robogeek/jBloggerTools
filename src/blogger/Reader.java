@@ -42,6 +42,11 @@ public class Reader {
         connection.setDoInput(true);
         connection.setRequestProperty("Authorization", "GoogleLogin auth=" + token);
         
+        /*Map<String,List<String>> reqprop = connection.getRequestProperties();
+        System.out.println(url.toString());
+        System.out.println("GoogleLogin auth=" + token);
+        System.out.println(reqprop.toString());*/
+        
         InputStream istream = null;
         try {
             istream = connection.getInputStream();

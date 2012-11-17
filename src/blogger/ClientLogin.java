@@ -8,6 +8,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
+import java.util.List;
 
 public class ClientLogin {
 
@@ -26,19 +28,23 @@ public class ClientLogin {
     }
     
     public static String getAuthToken(String accountType, String email,String password, String service, String source) {
+        // System.out.println("getAuthToken accountType"+ accountType +" email="+ email +" password="+ password);
         try {
             String str = post(
                 "https://www.google.com/accounts/ClientLogin",
                 "accountType=" + accountType + "&Email=" + email
                 + "&Passwd=" + password + "&service=" + service
                 + "&source=" + source, "x-www-form-urlencoded");
-            String[] lines = str.split(System.getProperty("line.separator"));
+            String[] lines = str.split("\n"); // System.getProperty("line.separator"));
             for (String line : lines) {
                 if (line.startsWith("Auth=")) {
+                    //System.out.println(line);
                     return line.substring(5);
                 }
             }
         } catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
@@ -60,23 +66,28 @@ public class ClientLogin {
         if (sb != null) {
             responseMessage = sb.toString();
         }
+        //System.out.println(responseMessage);
         return responseMessage;
     }
     
     static private String post(String url, String query, String contentType)
         throws MalformedURLException, IOException
     {
-        URLConnection connection = new URL(url).openConnection();
+        URL postUrl = new URL(url);
+        URLConnection connection = postUrl.openConnection();
         connection.setReadTimeout(DEFULT_READ_TIMEOUT);
         connection.setConnectTimeout(DEFULT_CONNECT_TIMEOUT);
         connection.setDoOutput(true); // Triggers POST.
         connection.setRequestProperty("Accept-Charset", CHARSET_UTF8);
         connection.setRequestProperty("Content-Type", "application/" + contentType);
+        /*Map<String,List<String>> reqprop = connection.getRequestProperties();
+        System.out.println(postUrl.toString());
+        System.out.println(reqprop.toString());*/
         OutputStream output = null;
         try {
             output = connection.getOutputStream();
             output.write(query.getBytes(CHARSET_UTF8));
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
         } finally {
