@@ -337,11 +337,19 @@ public class FromText {
             }
             
             String thumbs = "";
+            Thumbnail theThumb = null;
+            int maxArea = -1;
             for (Thumbnail thumb : row.thumbs) {
-                thumbs += thumbTemplate.replaceAll("@width@", Integer.toString(thumb.width))
-                        .replaceAll("@height@", Integer.toString(thumb.height))
-                        .replaceAll("@imageurl@", Matcher.quoteReplacement(thumb.url));
+                int area = thumb.width * thumb.height;
+                if (area > maxArea) {
+                    theThumb = thumb;
+                    maxArea = area;
+                }
             }
+            if (theThumb != null)
+                thumbs = thumbTemplate.replaceAll("@width@", Integer.toString(theThumb.width))
+                    .replaceAll("@height@", Integer.toString(theThumb.height))
+                    .replaceAll("@imageurl@", Matcher.quoteReplacement(theThumb.url));
             
             String post = postBodyTemplate
                     .replaceAll("@descriptions@", Matcher.quoteReplacement(Sdesc))
@@ -407,7 +415,7 @@ public class FromText {
     static final String descriptTemplate = "<p>@description@</p>\n";
     static final String linkTemplate  = "<p><a href=\"@url@\">@url@</a></p>\n";
     static final String smLinkTemplate  = "<p><span style='font-size: x-small;'><a href=\"@url@\">@url@</a></span></p>\n";
-    static final String thumbTemplate = "<p><img width='@width' height='@height' src=\"@imageurl@\"/></p>";
+    static final String thumbTemplate = "<p><img style='max-width: 150px' width='@width' height='@height' src=\"@imageurl@\"/></p>";
     static final String mediaCreditTemplate = "<p>Credit: @mediaCredit@</p>\n";
     
     static final String enclosureAudioTemplate = ""; // TODO audio enclosure template
@@ -602,6 +610,24 @@ public class FromText {
         parseText(new File(fnIn));
         posted = rows;
         postSummary(fnOut);
+    }
+    
+    public void addTag(String[] args)
+        throws FileNotFoundException, IOException 
+    {
+        String inputFile  = args[1];
+        String outputFile = args[2];
+        String tag        = args[3];
+        
+        parseText(new File(inputFile));
+        PrintStream out = new PrintStream(outputFile);
+        
+        for (Row row : rows) {
+            row.addUniqueCategory(tag);
+            out.println("");
+            out.println(row.toString());
+            out.println("");
+        }
     }
     
     public static void main(String[] args) 

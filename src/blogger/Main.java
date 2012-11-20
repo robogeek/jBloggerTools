@@ -29,6 +29,7 @@ public class Main {
         if (args.length > 0 && args[0].equals("fromtext")) FromText.main(args);
         else if (args.length > 0 && args[0].equals("counttext")) new FromText().countItems(args[1]);
         else if (args.length > 0 && args[0].equals("summary")) new FromText().generateSummary(args[1], args[2]);
+        else if (args.length > 0 && args[0].equals("addtag")) new FromText().addTag(args);
         else if (args.length > 0 && args[0].equals("feed2text")) Feed2Text.main(args);
         else if (args.length > 0 && args[0].equals("listblogs")) ListBlogs.main(args);
         else if (args.length > 0 && args[0].equals("drupalcvt")) Converter.main(args);
@@ -40,15 +41,16 @@ public class Main {
         else {
             System.out.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
             System.out.println("USAGE - Main feed2text feedUrl");
+            System.out.println("USAGE - Main addtag inputFile outputFile tag");
             System.out.println("USAGE - Main counttext inputFile");
             System.out.println("USAGE - Main summary inputFile summaryFile");
             System.out.println("USAGE - Main listblogs userName userPasswd");
             System.out.println("USAGE - Main drupalcvt");
             System.out.println("USAGE - Main readertags userName userPassword");
-            System.out.println("USAGE - Main tag userName userPassword tagName");
-            System.out.println("USAGE - Main starred userName userPassword");
+            System.out.println("USAGE - Main tag userName userPassword tagName maxHours");
+            System.out.println("USAGE - Main starred userName userPassword maxHours");
             System.out.println("USAGE - Main feedfinder userName userPassword query");
-            System.out.println("USAGE - Main feed userName userPassword feedUrl");
+            System.out.println("USAGE - Main feed userName userPassword feedUrl maxHours");
         }
     }
     
