@@ -13,6 +13,7 @@ import java.net.URLConnection;
 import java.util.Map;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Date;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -141,21 +142,27 @@ public class Reader {
         String userPasswd = args[2];
         String tagName    = args[3];
         String outfn      = args.length >= 5 ? args[4] : "-";
+        String hours      = args.length >= 6 ? args[5] : "0";
         String token = getAuthToken(userName, userPasswd);
         //System.out.println(token);
         
-        // URL encode this string rather than just concatenate
-        long now = System.currentTimeMillis();
+        /*long now = System.currentTimeMillis();
         String sNow = Long.toString(now);
         long then = now - (3600 * 1000 * 24 * 7); // should be 7 days
-        String sThen = Long.toString(then);
+        String sThen = Long.toString(then);*/
+        
+        int nHours = Integer.parseInt(hours);
+        long oldest = nHours > 0 ? System.currentTimeMillis() - (nHours * 60 * 60 * 1000) : 0;
+        //if (oldest > 0) System.out.println("oldest=" + new Date(oldest).toString());
+        
+        // URL encode this string rather than just concatenate
         String sUrl = "https://www.google.com/reader/api/0/stream/contents/user/-/label/" + tagName.replace(" ", "%20")
             /*+ "?ck=" + sNow + "&nt="+ sThen +"&ot="+ sThen
             +"&n=400&co=true&c=CKL2t6j30KICSPTQ3f2hhawC&client=exampleCo-exampleApp-1"*/;
         URL url = new URL(sUrl);
         String json = dataForUrl(url, token);
         
-        printFeed2Text(new JSONObject(json), outfn);
+        printFeed2Text(new JSONObject(json), outfn, oldest);
         
         /*JSONObject jso = new JSONObject(json);
         System.out.println(jso.toString(4));*/
@@ -173,21 +180,27 @@ public class Reader {
         String userPasswd = args[2];
         String feed       = args[3];
         String outfn      = args.length >= 5 ? args[4] : "-";
+        String hours      = args.length >= 6 ? args[5] : "0";
         String token = getAuthToken(userName, userPasswd);
         //System.out.println(token);
         
         // URL encode this string rather than just concatenate
-        long now = System.currentTimeMillis();
+        /*long now = System.currentTimeMillis();
         String sNow = Long.toString(now);
         long then = now - (3600 * 1000 * 24 * 7); // should be 7 days
-        String sThen = Long.toString(then);
+        String sThen = Long.toString(then);*/
+        
+        int nHours = Integer.parseInt(hours);
+        long oldest = nHours > 0 ? System.currentTimeMillis() - (nHours * 60 * 60 * 1000) : 0;
+        //if (oldest > 0) System.out.println("oldest=" + new Date(oldest).toString());
+        
         String sUrl = "https://www.google.com/reader/api/0/stream/contents/" + encoded("feed/"+ feed)
             /*+ "?ck=" + sNow + "&nt="+ sThen +"&ot="+ sThen
             +"&n=400&co=true&c=CKL2t6j30KICSPTQ3f2hhawC&client=exampleCo-exampleApp-1"*/;
         URL url = new URL(sUrl);
         String json = dataForUrl(url, token);
         
-        printFeed2Text(new JSONObject(json), outfn);
+        printFeed2Text(new JSONObject(json), outfn, oldest);
         
         /*JSONObject jso = new JSONObject(json);
         System.out.println(jso.toString(4));*/
@@ -203,21 +216,27 @@ public class Reader {
         String userName   = args[1];
         String userPasswd = args[2];
         String outfn      = args.length >= 4 ? args[3] : "-";
+        String hours      = args.length >= 5 ? args[6] : "0";
         String token = getAuthToken(userName, userPasswd);
         //System.out.println(token);
         
         // URL encode this string rather than just concatenate
-        long now = System.currentTimeMillis();
+        /*long now = System.currentTimeMillis();
         String sNow = Long.toString(now);
         long then = now - (3600 * 1000 * 24 * 7); // should be 7 days
-        String sThen = Long.toString(then);
+        String sThen = Long.toString(then);*/
+        
+        int nHours = Integer.parseInt(hours);
+        long oldest = nHours > 0 ? System.currentTimeMillis() - (nHours * 60 * 60 * 1000) : 0;
+        //if (oldest > 0) System.out.println("oldest=" + new Date(oldest).toString());
+        
         String sUrl = "https://www.google.com/reader/api/0/stream/contents/user/-/state/com.google/starred" 
             /*+ "?ck=" + sNow + "&nt="+ sThen +"&ot="+ sThen
             +"&n=400&co=true&c=CKL2t6j30KICSPTQ3f2hhawC&client=exampleCo-exampleApp-1"*/;
         URL url = new URL(sUrl);
         String json = dataForUrl(url, token);
         
-        printFeed2Text(new JSONObject(json), outfn);
+        printFeed2Text(new JSONObject(json), outfn, oldest);
         
     }
     
@@ -239,17 +258,34 @@ public class Reader {
         return ret;
     }
     
-    static void printFeed2Text(JSONObject feed, String outfn)  
+    static void printFeed2Text(JSONObject feed, String outfn, long oldest)  
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
     {
+        JSONArray items = feed.getJSONArray("items");
+        if (items.length() <= 0)
+            return;
         PrintStream out = System.out;
         if (outfn != null && ! outfn.equals("-")) {
             out = new PrintStream(outfn);
         }
-        JSONArray items = feed.getJSONArray("items");
         for (int i = 0; i < items.length(); i++) {
             JSONObject item = items.getJSONObject(i);
+            
+            long timestampUsec = -1;
+            try { timestampUsec = item.getLong("timestampUsec"); } catch (Exception e) { timestampUsec = -1; }
+            long publ = -1;
+            try { publ = item.getLong("published"); } catch (Exception e) { publ = -1; }
+            if (timestampUsec > 0) {
+                publ = (long)(timestampUsec / 1000);
+            }
+            //System.out.println(new Date(publ).toString() +" "+ item.getString("title"));
+            
+            if (publ < oldest) {
+                //System.out.println("TOO OLD - skipping");
+                continue;
+            }
+            
             //System.out.println(elem.toString());
             //System.out.println(elem.getString("id"));
             out.println("");
@@ -312,7 +348,7 @@ public class Reader {
                 } catch (Exception e) { }
             }
             
-            out.println("date: " + Long.toString(item.getLong("published")));
+            out.println("date: " + Long.toString(publ));
             out.println("");
         }
     }
