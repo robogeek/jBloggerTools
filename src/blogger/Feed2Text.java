@@ -145,7 +145,9 @@ public class Feed2Text {
                                     System.out.println("mediaTitle: " + chElem.getText());
                                 }
                                 if (chElem.getName().equals("description") && chElem.getNamespacePrefix().equals("media")) {
-                                    System.out.println("mediaDescription: " + chElem.getText());
+                                    String md = chElem.getText();
+                                    md = md.replace("\n", "<br/>");
+                                    System.out.println("mediaDescription: " + md);
                                 }
                                 if (chElem.getName().equals("credit") && chElem.getNamespacePrefix().equals("media")) {
                                     System.out.println("mediaCredit: " + chElem.getText());
@@ -158,8 +160,11 @@ public class Feed2Text {
                 }
             }
             SyndContent desc = entry.getDescription();
-            if (desc != null && desc.getValue().length() > 0) 
-                System.out.println("description: " + removeNewLines(desc.getValue()));
+            if (desc != null && desc.getValue().length() > 0) {
+                String d = desc.getValue();
+                d.replace("\n", "<br/>");
+                System.out.println("description: " + d);
+            }
             for (Object oencl : entry.getEnclosures()) {
                 SyndEnclosure encl = (SyndEnclosure)oencl;
                 System.out.println("enclosureUrl: " + encl.getUrl());
