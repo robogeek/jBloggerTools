@@ -30,6 +30,12 @@ public class Main {
         else if (args.length > 0 && args[0].equals("counttext")) new FromText().countItems(args[1]);
         else if (args.length > 0 && args[0].equals("summary")) new FromText().generateSummary(args[1], args[2]);
         else if (args.length > 0 && args[0].equals("addtag")) new FromText().addTag(args);
+        else if (args.length > 0 && args[0].equals("rmtags")) new FromText().addTag(args);
+        else if (args.length > 0 && args[0].equals("tagtitle")) new FromText().tagTitle(args);
+        else if (args.length > 0 && args[0].equals("sorttitle")) new FromText().sortTitle(args);
+        else if (args.length > 0 && args[0].equals("add2urilist")) new FromText().addToUriList(args);
+        else if (args.length > 0 && args[0].equals("expungebyuri")) new FromText().expungeByUri(args);
+        else if (args.length > 0 && args[0].equals("merge")) new FromText().merge(args);
         else if (args.length > 0 && args[0].equals("feed2text")) Feed2Text.main(args);
         else if (args.length > 0 && args[0].equals("listblogs")) ListBlogs.main(args);
         else if (args.length > 0 && args[0].equals("drupalcvt")) Converter.main(args);
@@ -42,6 +48,12 @@ public class Main {
             System.out.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
             System.out.println("USAGE - Main feed2text feedUrl");
             System.out.println("USAGE - Main addtag inputFile outputFile tag");
+            System.out.println("USAGE - Main rmtag inputFile outputFile");
+            System.out.println("USAGE - Main tagTitle inputFile outputFile tag");
+            System.out.println("USAGE - Main sortTitle inputFile outputFile");
+            System.out.println("USAGE - Main add2urilist urifile txtfile");
+            System.out.println("USAGE - Main expungebyuri urifile txtfile");
+            System.out.println("USAGE - Main merge urifile outtxtfile infile1 infile2 infile3 ...");
             System.out.println("USAGE - Main counttext inputFile");
             System.out.println("USAGE - Main summary inputFile summaryFile");
             System.out.println("USAGE - Main listblogs userName userPasswd");

@@ -9,6 +9,8 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
@@ -125,6 +127,10 @@ public class FromText {
         public void addUniqueCategory(String name) {
             if (! categories.contains(name))
                 categories.add(name);
+        }
+        
+        public void removeCategories() {
+            this.categories       = new LinkedList<String>();
         }
         
         public void addDescription(String desc) {
@@ -245,6 +251,7 @@ public class FromText {
                 // - process previously gathered data
                 // System.out.println("EMPTY LINE row=" + thisRow.toString());
                 if (! thisRow.isEmpty()) {
+                    // System.out.println("ADDED " + thisRow.uri +" "+ thisRow.title);
                     rows.addLast(thisRow);
                     // System.out.println("ADDED " + thisRow.toString());
                     thisRow = new Row();
@@ -322,9 +329,9 @@ public class FromText {
             for (String desc : row.descriptions) {
                 Sdesc += descriptTemplate.replaceAll("@description@", Matcher.quoteReplacement(desc));
             }
-            if (Sdesc == null)
+            if (Sdesc == null || Sdesc.equals(""))
                 Sdesc = (row.mediaDescription != null && row.mediaDescription.length() > 0)
-                    ? row.mediaDescription : null;
+                    ? row.mediaDescription : "";
             
             String MC = 
                     (row.mediaCredit != null && row.mediaCredit.length() > 0)
@@ -480,7 +487,6 @@ public class FromText {
     private void notPostedSummary(String notPostedFile) throws FileNotFoundException {
         PrintStream out = new PrintStream(notPostedFile);
         for (Row row : rows) {
-        // for (Row row = rows.peekLast(); row != null; row = rows.peekLast()) {
             rows.remove(row);
             out.println("");
             out.println(row.toString());
@@ -612,6 +618,20 @@ public class FromText {
         postSummary(fnOut);
     }
     
+    public void rmTags(String[] args)
+        throws FileNotFoundException, IOException 
+    {
+        String inputFile  = args[1];
+        String outputFile = args[2];
+        
+        parseText(new File(inputFile));
+        
+        for (Row row : rows) {
+            row.removeCategories();
+        }
+        writeRowsToFile(outputFile, rows);
+    }
+    
     public void addTag(String[] args)
         throws FileNotFoundException, IOException 
     {
@@ -620,14 +640,145 @@ public class FromText {
         String tag        = args[3];
         
         parseText(new File(inputFile));
-        PrintStream out = new PrintStream(outputFile);
         
         for (Row row : rows) {
             row.addUniqueCategory(tag);
+        }
+        writeRowsToFile(outputFile, rows);
+    }
+    
+    public void tagTitle(String[] args)
+        throws FileNotFoundException, IOException 
+    {
+        String inputFile  = args[1];
+        String outputFile = args[2];
+        String tag        = args[3];
+        
+        parseText(new File(inputFile));
+        
+        for (Row row : rows) {
+            row.setTitle(tag +" - "+ row.title);
+        }
+        writeRowsToFile(outputFile, rows);
+    }
+    
+    public void sortTitle(String[] args)
+        throws FileNotFoundException, IOException 
+    {
+        String inputFile  = args[1];
+        String outputFile = args[2];
+        
+        parseText(new File(inputFile));
+        
+        Collections.sort(rows, new Comparator<Row>() {
+            public int compare(Row r1, Row r2) {
+                return r1.title.compareTo(r2.title);
+            }
+        });
+        
+        writeRowsToFile(outputFile, rows);
+    }
+    
+    public void merge(String[] args) 
+        throws FileNotFoundException, IOException
+    {
+        String uriFile  = args[1];
+        String outFile  = args[2];
+        String urilist = readAll(uriFile);
+        
+        for (int i = 3; i < args.length; i++) {
+            // System.out.println("********* " + args[i]);
+            parseText(new File(args[i]));
+        }
+        
+        LinkedList<Row> newrows   = new LinkedList<Row>();
+        for (Row row : rows) {
+            if (! urilist.contains(row.uri)) {
+                newrows.addLast(row);
+                // System.out.println("Adding to output: "+ row.uri +" "+ row.title);
+                urilist += row.uri + "\n";
+            } /* else {
+                System.out.println("Skipping: "+ row.uri +" "+ row.title);
+            }*/
+        }
+        
+        writeRowsToFile(outFile, newrows);
+        writeAll(urilist, uriFile);
+    }
+    
+    public void addToUriList(String[] args)
+        throws FileNotFoundException, IOException
+    {
+        
+        String uriFile  = args[1];
+        String txtFile  = args[2];
+        
+        parseText(new File(txtFile));
+        String urilist = readAll(uriFile);
+        for (Row row : rows) {
+            if (! urilist.contains(row.uri)) {
+                urilist += row.uri + "\n";
+            }
+        }
+        writeAll(urilist, uriFile);
+    }
+    
+    public void expungeByUri(String[] args) 
+        throws FileNotFoundException, IOException
+    {
+        
+        String uriFile  = args[1];
+        String txtFile  = args[2];
+        
+        parseText(new File(txtFile));
+        String urilist = readAll(uriFile);
+        
+        LinkedList<Row> newrows   = new LinkedList<Row>();
+        for (Row row : rows) {
+            if (! urilist.contains(row.uri)) {
+                newrows.addLast(row);
+                urilist += row.uri + "\n";
+            }
+        }
+        
+        writeRowsToFile(txtFile, newrows);
+        writeAll(urilist, uriFile);
+    }
+    
+    String readAll(String fname) 
+        throws FileNotFoundException, IOException
+    {
+        String ret = "";
+        
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(fname));
+            String line = null;
+            for (line = in.readLine(); line != null; line = in.readLine()) {
+                ret += line + "\n";
+            }
+        }
+        catch (Exception e) { }
+        return ret;
+    }
+    
+    void writeAll(String urilist, String fname)
+        throws IOException
+    {
+        BufferedWriter bout = new BufferedWriter(new FileWriter(fname));
+        bout.write(urilist);
+        bout.close();
+    }
+    
+    void writeRowsToFile(String fname, LinkedList<Row> therows)
+        throws FileNotFoundException
+    {
+        PrintStream out = new PrintStream(fname);
+        for (Row row : therows) {
             out.println("");
             out.println(row.toString());
             out.println("");
         }
+        out.close();
     }
     
     public static void main(String[] args) 
