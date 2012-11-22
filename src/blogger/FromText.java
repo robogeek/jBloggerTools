@@ -145,6 +145,10 @@ public class FromText {
             urls.add(url);
         }
         
+        public void removeDate() {
+            this.date = "";
+        }
+        
         private String cleanup(String txt) {
             return txt
             .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x93 }), "-")
@@ -202,11 +206,11 @@ public class FromText {
             }
             String Surls = "";
             for (String Surl : urls) {
-                Surls += urlTmpl.replaceAll("@url@", Surl);
+                Surls += urlTmpl.replaceAll("@url@", Matcher.quoteReplacement(Surl));
             }
             String Sdescs = "";
             for (String Sdesc : descriptions) {
-                Sdescs += descTmpl.replaceAll("@description@", Sdesc);
+                Sdescs += descTmpl.replaceAll("@description@", Matcher.quoteReplacement(Sdesc));
             }
             return tmpl
                     .replaceAll("@title@",         (title != null) ? Matcher.quoteReplacement(title) : "")
@@ -618,6 +622,20 @@ public class FromText {
         postSummary(fnOut);
     }
     
+    public void rmDate(String[] args)
+        throws FileNotFoundException, IOException 
+    {
+        String inputFile  = args[1];
+        String outputFile = args[2];
+        
+        parseText(new File(inputFile));
+        
+        for (Row row : rows) {
+            row.removeDate();
+        }
+        writeRowsToFile(outputFile, rows);
+    }
+    
     public void rmTags(String[] args)
         throws FileNotFoundException, IOException 
     {
@@ -693,7 +711,7 @@ public class FromText {
         
         LinkedList<Row> newrows   = new LinkedList<Row>();
         for (Row row : rows) {
-            if (! urilist.contains(row.uri)) {
+            if (row.uri == null || row.uri.equals("") || (! urilist.contains(row.uri))) {
                 newrows.addLast(row);
                 // System.out.println("Adding to output: "+ row.uri +" "+ row.title);
                 urilist += row.uri + "\n";

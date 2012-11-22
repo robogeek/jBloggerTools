@@ -263,8 +263,10 @@ public class Reader {
             org.json.JSONException
     {
         JSONArray items = feed.getJSONArray("items");
-        if (items.length() <= 0)
+        if (items.length() <= 0) {
+            new PrintStream(outfn).close();
             return;
+        }
         PrintStream out = System.out;
         if (outfn != null && ! outfn.equals("-")) {
             out = new PrintStream(outfn);

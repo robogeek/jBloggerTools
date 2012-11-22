@@ -30,7 +30,8 @@ public class Main {
         else if (args.length > 0 && args[0].equals("counttext")) new FromText().countItems(args[1]);
         else if (args.length > 0 && args[0].equals("summary")) new FromText().generateSummary(args[1], args[2]);
         else if (args.length > 0 && args[0].equals("addtag")) new FromText().addTag(args);
-        else if (args.length > 0 && args[0].equals("rmtags")) new FromText().addTag(args);
+        else if (args.length > 0 && args[0].equals("rmtags")) new FromText().rmTags(args);
+        else if (args.length > 0 && args[0].equals("rmdate")) new FromText().rmDate(args);
         else if (args.length > 0 && args[0].equals("tagtitle")) new FromText().tagTitle(args);
         else if (args.length > 0 && args[0].equals("sorttitle")) new FromText().sortTitle(args);
         else if (args.length > 0 && args[0].equals("add2urilist")) new FromText().addToUriList(args);
@@ -48,8 +49,9 @@ public class Main {
             System.out.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
             System.out.println("USAGE - Main feed2text feedUrl");
             System.out.println("USAGE - Main addtag inputFile outputFile tag");
-            System.out.println("USAGE - Main rmtag inputFile outputFile");
-            System.out.println("USAGE - Main tagTitle inputFile outputFile tag");
+            System.out.println("USAGE - Main rmtags inputFile outputFile");
+            System.out.println("USAGE - Main rmdate inputFile outputFile");
+            System.out.println("USAGE - Main tagtitle inputFile outputFile tag");
             System.out.println("USAGE - Main sortTitle inputFile outputFile");
             System.out.println("USAGE - Main add2urilist urifile txtfile");
             System.out.println("USAGE - Main expungebyuri urifile txtfile");
