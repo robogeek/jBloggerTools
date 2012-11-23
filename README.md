@@ -56,10 +56,28 @@ Generating an HTML summary of items in a blog text file
 
     java -jar dist/jBloggerTools.jar summary inputFile summaryFile
 
+Adding to the tags in entries, or removing tags
+===============================================
+
+    java -jar dist/jBloggerTools.jar addtag inputFile summaryFile tag
+    java -jar dist/jBloggerTools.jar rmtags inputFile summaryFile
+
+Removing the date: data from entries
+====================================
+
+    java -jar dist/jBloggerTools.jar rmdate inputFile summaryFile
+
+Merging multiple txt files together, eliminating duplicates
+===========================================================
+
+    java -jar dist/jBloggerTools.jar merge urifile.txt inputFile outputFile file1 file2 file3 ...
+
+
+
 Text format to represent blog posts
 ===================================
 
-I don't know if there is any standard archival format for blog post entries.  This is a simple format that I came up with, and it works for my needs.  
+I don't know if there is any standard archival format for blog post entries.  This is a simple format that I came up with, and it works for my needs.  There is a lot more than the following fields, so look in Feed2Text.java for information on the other fields.  Creating new fields is simply a matter of defining them in either Feed2Text.java or Reader.java, then defining code in FromText.java to parse those lines.
 
 The basic idea is to use blocks of "tag: value" fields to represent individual data items of a blog post, and to separate those blocks by blank lines.  Blank lines delineate the blog posts in the text file.
 
