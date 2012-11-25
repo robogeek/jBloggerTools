@@ -102,7 +102,7 @@ public class Feed2Text {
                 System.out.println("tag: " + tagName);
             }
             if (rssItem != null) {
-                System.out.println("rssguid: " + removeNewLines(rssItem.getGuid().toString()));
+                System.out.println("rssguid: " + Utils.removeNewLines(rssItem.getGuid().toString()));
                 // System.out.println("rssDescription: " + rssItem.getDescription());
             }
             if (atomItem != null) {
@@ -172,16 +172,6 @@ public class Feed2Text {
             }
             System.out.println("");
         }
-    }
-    
-    // String removeNewLines(String s) { return Feed2Text.removeNewLines(s); }
-    
-    public static String removeNewLines(String s) {
-        while (s.indexOf("\n") >= 0) {
-            String n = s.substring(0, s.indexOf("\n")) + s.substring(s.indexOf("\n") + 1);
-            s = n;
-        }
-        return s;
     }
     
     boolean allowEntry(SyndEntryImpl entry) {

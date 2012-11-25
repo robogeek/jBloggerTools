@@ -45,6 +45,9 @@ public class Main {
         else if (args.length > 0 && args[0].equals("starred")) Reader.starred(args);
         else if (args.length > 0 && args[0].equals("feedfinder")) Reader.feedFinder(args);
         else if (args.length > 0 && args[0].equals("feed")) Reader.feed(args);
+        else if (args.length > 0 && args[0].equals("encode")) {
+            System.out.println(Utils.encoded(args[1]));
+        }
         else {
             System.out.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
             System.out.println("USAGE - Main feed2text feedUrl");
@@ -65,6 +68,7 @@ public class Main {
             System.out.println("USAGE - Main starred userName userPassword maxHours");
             System.out.println("USAGE - Main feedfinder userName userPassword query");
             System.out.println("USAGE - Main feed userName userPassword feedUrl maxHours");
+            System.out.println("USAGE - Main encode text");
         }
     }
     

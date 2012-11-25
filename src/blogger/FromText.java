@@ -125,6 +125,7 @@ public class FromText {
         }
         
         public void addUniqueCategory(String name) {
+            name = name.replace(" & ", " and ");
             if (! categories.contains(name))
                 categories.add(name);
         }
@@ -134,11 +135,11 @@ public class FromText {
         }
         
         public void addDescription(String desc) {
-            descriptions.add(cleanup(desc));
+            descriptions.add(Utils.cleanup(desc));
         }
         
         public void setTitle(String title) {
-            this.title = cleanup(title);
+            this.title = Utils.cleanup(title);
         }
         
         public void addUrl(String url) {
@@ -148,23 +149,7 @@ public class FromText {
         public void removeDate() {
             this.date = "";
         }
-        
-        private String cleanup(String txt) {
-            return txt
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x93 }), "-")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x94 }), "-")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x95 }), "-")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x98 }), "'")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x99 }), "'")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9a }), ",")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9c }), "\"")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9d }), "\"")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9e }), "\"")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xa6 }), "...")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xb2 }), "'")
-            .replace(new String(new byte[] { (byte)0xc2, (byte)0xa0 }), " ");
-        }
-        
+
         private static final String tmpl =
             "title: @title@\n"
            +"uri: @uri@\n"
@@ -296,14 +281,6 @@ public class FromText {
         fr.close();
     }
     
-//    String removeCR(String s) {
-//        while (s.endsWith("\r")) {
-//            String n = s.substring(0, s.indexOf("\r")); // + s.substring(s.indexOf("\r") + 1);
-//            s = n;
-//        }
-//        return s;
-//    }
-    
     private void postIndividually(Blog blog)
         throws com.google.gdata.util.ServiceException, java.io.IOException,
             java.net.MalformedURLException, ParseException
@@ -389,10 +366,6 @@ public class FromText {
             posted.addLast(row);
         }
     }
-    
-    // Row data fields not appearing in post templates:
-    // 
-    //    links, mediaTitle
     
     static final String postBodyTemplate =
             "@descriptions@\n"
@@ -483,17 +456,6 @@ public class FromText {
                             : ""
                         )
                     );
-            out.println("");
-        }
-        out.close();
-    }
-    
-    private void notPostedSummary(String notPostedFile) throws FileNotFoundException {
-        PrintStream out = new PrintStream(notPostedFile);
-        for (Row row : rows) {
-            rows.remove(row);
-            out.println("");
-            out.println(row.toString());
             out.println("");
         }
         out.close();
@@ -605,7 +567,10 @@ public class FromText {
         }
         
         if (postedFile != null) postSummary(postedFile);
-        if (notPostedFile != null) notPostedSummary(notPostedFile);
+        if (notPostedFile != null) {
+            writeRowsToFile(notPostedFile, rows);
+        }
+        rows.clear();
     }
     
     public void countItems(String fn) throws FileNotFoundException, IOException {
@@ -727,7 +692,6 @@ public class FromText {
     public void addToUriList(String[] args)
         throws FileNotFoundException, IOException
     {
-        
         String uriFile  = args[1];
         String txtFile  = args[2];
         
@@ -744,7 +708,6 @@ public class FromText {
     public void expungeByUri(String[] args) 
         throws FileNotFoundException, IOException
     {
-        
         String uriFile  = args[1];
         String txtFile  = args[2];
         
@@ -767,7 +730,6 @@ public class FromText {
         throws FileNotFoundException, IOException
     {
         String ret = "";
-        
         try {
             BufferedReader in = new BufferedReader(new FileReader(fname));
             String line = null;

@@ -18,20 +18,9 @@ import java.util.Date;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
-import java.net.URLEncoder;
-import java.io.UnsupportedEncodingException;
-
 import java.text.Normalizer;
 
 public class Reader {
-    
-    static String encoded(String str) {
-        try {
-            return URLEncoder.encode(str, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
     
     public static String getAuthToken(String userName, String userPasswd) {
         return ClientLogin.getAuthToken(ClientLogin.GOOGLE, userName, userPasswd, "reader", "exampleCo-exampleApp-1");
@@ -114,21 +103,12 @@ public class Reader {
         }
         String token = getAuthToken(userName, userPasswd);
         
-        // https://www.google.com/reader/api/0/tag/list?output=json&ck=116900000&client=gooberitis
-        
-        String sUrl = "https://www.google.com/reader/api/0/feed-finder?output=json&q=" + encoded(query);
+        String sUrl = "https://www.google.com/reader/api/0/feed-finder?output=json&q=" + Utils.encoded(query);
         URL url = new URL(sUrl);
         String json = dataForUrl(url, token);
         
         JSONObject jso = new JSONObject(json);
         out.println(jso.toString(4));
-        
-//        JSONArray tags = jso.getJSONArray("tags");
-//        for (int i = 0; i < tags.length(); i++) {
-//            JSONObject elem = tags.getJSONObject(i);
-//            //System.out.println(elem.toString());
-//            System.out.println(elem.getString("id"));
-//        }
     }
     
     public static void tagEntries(String[] args)
@@ -166,14 +146,12 @@ public class Reader {
         
         /*JSONObject jso = new JSONObject(json);
         System.out.println(jso.toString(4));*/
-        
     }
     
     public static void feed(String[] args)
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
     {
-        
         // http://www.google.com/reader/api/0/stream/contents/user/06431169646684139352/label/Tech News?ck=116900000&client=gooberitis
         
         String userName   = args[1];
@@ -194,7 +172,7 @@ public class Reader {
         long oldest = nHours > 0 ? System.currentTimeMillis() - (nHours * 60 * 60 * 1000) : 0;
         //if (oldest > 0) System.out.println("oldest=" + new Date(oldest).toString());
         
-        String sUrl = "https://www.google.com/reader/api/0/stream/contents/" + encoded("feed/"+ feed)
+        String sUrl = "https://www.google.com/reader/api/0/stream/contents/" + Utils.encoded("feed/"+ feed)
             /*+ "?ck=" + sNow + "&nt="+ sThen +"&ot="+ sThen
             +"&n=400&co=true&c=CKL2t6j30KICSPTQ3f2hhawC&client=exampleCo-exampleApp-1"*/;
         URL url = new URL(sUrl);
@@ -210,7 +188,6 @@ public class Reader {
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
     {
-        
         // https://www.google.com/reader/api/0/stream/contents/user/<usrId>/state/com.google/starred
         
         String userName   = args[1];
@@ -237,25 +214,6 @@ public class Reader {
         String json = dataForUrl(url, token);
         
         printFeed2Text(new JSONObject(json), outfn, oldest);
-        
-    }
-    
-    static String cleanup(String txt) {
-        String ret = null;
-        ret = txt.replaceAll("<iframe[^>]*>[^<]*</iframe>", "")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x93 }), "-")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x94 }), "-")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x95 }), "-")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x98 }), "'")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x99 }), "'")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9a }), ",")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9c }), "\"")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9d }), "\"")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9e }), "\"")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xa6 }), "...")
-            .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xb2 }), "'")
-            .replace(new String(new byte[] { (byte)0xc2, (byte)0xa0 }), " ");
-        return ret;
     }
     
     static void printFeed2Text(JSONObject feed, String outfn, long oldest)  
@@ -290,20 +248,20 @@ public class Reader {
             
             //System.out.println(elem.toString());
             //System.out.println(elem.getString("id"));
-            out.println("");
+            //out.println("");
             //System.out.println(item.toString(4));
-            //System.out.println("");
-            out.println("title: " + cleanup(item.getString("title")));
+            System.out.println("");
+            out.println("title: " + Utils.cleanup(item.getString("title")));
             
             JSONObject summary =  null;
             try { summary = item.getJSONObject("summary"); } catch (Exception e) { summary = null; }
             if (summary != null)
-                try { out.println("description: " + cleanup(Feed2Text.removeNewLines(summary.getString("content")))); } catch (Exception e) { }
+                try { out.println("description: " + Utils.cleanup(Utils.removeNewLines(summary.getString("content")))); } catch (Exception e) { }
             
             JSONObject content = null;
             try { content = item.getJSONObject("content"); } catch (Exception e) { content = null; }
             if (content != null) 
-                try { out.println("description: " + cleanup(Feed2Text.removeNewLines(content.getString("content")))); } catch (Exception e) { }
+                try { out.println("description: " + Utils.cleanup(Utils.removeNewLines(content.getString("content")))); } catch (Exception e) { }
             
             JSONObject origin = null;
             try { origin = item.getJSONObject("origin"); } catch (Exception e) { origin = null; }
@@ -354,12 +312,5 @@ public class Reader {
             out.println("");
         }
     }
-    
-    
-    // Google Reader API Listing feed from a single tag or category
-    // http://stackoverflow.com/questions/9819233/google-reader-api-listing-feed-from-a-single-tag-or-category
-    // 
-    // https://www.google.com/reader/api/0/subscription/list
-    
     
 }
