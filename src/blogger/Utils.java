@@ -16,8 +16,30 @@ public class Utils {
     static String cleanup(String txt) {
         String ret = null;
         ret = txt.replaceAll("<iframe[^>]*>[^<]*</iframe>", "")
-            .replace("<img>[^h<]*height=['\"]1['\"][^w<]*width=['\"]1['\"][^<]*</img>", "")
-            .replace("<img>[^w<]*width=['\"]1['\"][^h<]*height=['\"]1['\"][^<]*</img>", "")
+            // Get rid of all 1x1 images
+            .replaceAll("<img[^h>]*height=['\"]1['\"][^w]*width=['\"]1['\"][^<]*</img>", "")
+            .replaceAll("<img[^w>]*width=['\"]1['\"][^h]*height=['\"]1['\"][^<]*</img>", "")
+            .replaceAll("<img[^h>]*height=['\"]1['\"][^w>]*width=['\"]1['\"][^>]*>", "")
+            .replaceAll("<img[^w>]*width=['\"]1['\"][^h>]*height=['\"]1['\"][^>]*>", "")
+            // Get rid of stuff from doubleclick
+            .replaceAll("<a[^h>]*href=['\"]http://googleads.g.doubleclick.net[^>]*>[^<]*</a>", "")
+            // Get rid of stuff from Wordpress
+            .replaceAll("<img[^>s]+src\\s*=\\s*['\"]http...stats.wordpress.com[^>]*>", "")
+            // Get rid of stuff from feedsportal
+            .replaceAll("<img[^>s]+src\\s*=\\s*['\"]http...res3.feedsportal.com[^>]*>", "")
+            .replaceAll("<img[^>s]+src\\s*=\\s*['\"]http...da.feedsportal.com[^>]*>", "")
+            .replaceAll("<a[^h>]*href=['\"]http://da.feedsportal.com/[^>]*>[^<]*</a>", "")
+            .replaceAll("<a[^h>]*href=['\"]http://share.feedsportal.com/[^>]*>[^<]*</a>", "")
+            .replaceAll("<a[^h>]*href=['\"]http://res.feedsportal.com/[^>]*>[^<]*</a>", "")
+            // Get rid of stuff from feedburner
+            .replaceAll("<img[^>s]+src\\s*=\\s*['\"]http://feeds.feedburner.com[^>]*>", "")
+            .replaceAll("<a[^h>]*href=['\"]http://feeds.feedburner.com..ff[^>]*>[^<]*</a>", "")
+            .replaceAll("<a[^h>]*href=['\"]http://feeds.importantmedia.org..ff[^>]*>[^<]*</a>", "")
+            // Get rid of empty table stuff 
+            .replaceAll("<td[^>]*>[^<]*</td>", "")
+            .replaceAll("<tr[^>]*>[^<]*</tr>", "")
+            .replaceAll("<table[^>]*>[^<]*</table>", "")
+            // Convert unicode and UTF-8 cruft to useful characters
             .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x93 }), "-")
             .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x94 }), "-")
             .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x95 }), "-")
@@ -29,6 +51,26 @@ public class Utils {
             .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x9e }), "\"")
             .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xa6 }), "...")
             .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0xb2 }), "'")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x80 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x81 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x82 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x83 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x84 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x85 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x86 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x87 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x88 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x89 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x90 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x91 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x92 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x93 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x94 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x95 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x96 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x97 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x98 }), "")
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0x99 }), "")
             .replace(new String(new byte[] { (byte)0xc2, (byte)0xa0 }), " ");
         return ret;
     }
