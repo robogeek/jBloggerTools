@@ -250,7 +250,7 @@ public class Reader {
             //System.out.println(elem.getString("id"));
             //out.println("");
             //System.out.println(item.toString(4));
-            System.out.println("");
+            out.println("");
             out.println("title: " + Utils.cleanup(item.getString("title")));
             
             JSONObject summary =  null;
