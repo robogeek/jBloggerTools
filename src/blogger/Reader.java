@@ -251,7 +251,7 @@ public class Reader {
             //out.println("");
             //System.out.println(item.toString(4));
             out.println("");
-            out.println("title: " + Utils.cleanup(item.getString("title")));
+            out.println("title: " + Utils.cleanTitle(Utils.cleanup(item.getString("title"))));
             
             JSONObject summary =  null;
             try { summary = item.getJSONObject("summary"); } catch (Exception e) { summary = null; }

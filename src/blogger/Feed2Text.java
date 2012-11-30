@@ -90,7 +90,7 @@ public class Feed2Text {
 //            if (oItem != null) System.out.println("wireEntry: " + oItem.toString()); 
             if (oItem instanceof Item)  rssItem  = (Item)  oItem;
             if (oItem instanceof Entry) atomItem = (Entry) oItem;
-            System.out.println("title: " + entry.getTitle()); 
+            System.out.println("title: " + Utils.cleanTitle(entry.getTitle())); 
             System.out.println("date: " + Long.toString(publ.getTime()) +" "+ Long.toString(publ.getTimezoneOffset()));
                 // entry.getPublishedDate().toString());
             System.out.println("url: " + entry.getLink());
@@ -145,8 +145,7 @@ public class Feed2Text {
                                     System.out.println("mediaTitle: " + chElem.getText());
                                 }
                                 if (chElem.getName().equals("description") && chElem.getNamespacePrefix().equals("media")) {
-                                    String md = chElem.getText();
-                                    md = md.replace("\n", "<br/>");
+                                    String md = Utils.cleanup(Utils.removeNewLines(chElem.getText()));
                                     System.out.println("mediaDescription: " + md);
                                 }
                                 if (chElem.getName().equals("credit") && chElem.getNamespacePrefix().equals("media")) {
@@ -161,8 +160,7 @@ public class Feed2Text {
             }
             SyndContent desc = entry.getDescription();
             if (desc != null && desc.getValue().length() > 0) {
-                String d = desc.getValue();
-                d.replace("\n", "<br/>");
+                String d = Utils.cleanup(Utils.removeNewLines(desc.getValue()));
                 System.out.println("description: " + d);
             }
             for (Object oencl : entry.getEnclosures()) {

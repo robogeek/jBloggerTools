@@ -13,6 +13,12 @@ public class Utils {
         return s;
     }
     
+    static String cleanTitle(String title) {
+        String ret = null;
+        ret = title.replaceAll("<b>", "").replace("</b>", "");
+        return ret;
+    }
+    
     static String cleanup(String txt) {
         String ret = null;
         ret = txt.replaceAll("<iframe[^>]*>[^<]*</iframe>", "")
@@ -36,9 +42,11 @@ public class Utils {
             .replaceAll("<a[^h>]*href=['\"]http://feeds.feedburner.com..ff[^>]*>[^<]*</a>", "")
             .replaceAll("<a[^h>]*href=['\"]http://feeds.importantmedia.org..ff[^>]*>[^<]*</a>", "")
             // Get rid of empty table stuff 
-            .replaceAll("<td[^>]*>[^<]*</td>", "")
-            .replaceAll("<tr[^>]*>[^<]*</tr>", "")
-            .replaceAll("<table[^>]*>[^<]*</table>", "")
+            .replaceAll("<td[^>]*>\\s*</td>", "")
+            .replaceAll("<tr[^>]*>\\s*</tr>", "")
+            .replaceAll("<table[^>]*>\\s*</table>", "")
+            .replaceAll("<div[^>]*>\\s*</div>", "")
+            .replaceAll("<span[^>]*>\\s*</span>", "")
             // Convert unicode and UTF-8 cruft to useful characters
             .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x93 }), "-")
             .replace(new String(new byte[] { (byte)0xe2, (byte)0x80, (byte)0x94 }), "-")
