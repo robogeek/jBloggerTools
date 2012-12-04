@@ -2,8 +2,26 @@ package blogger;
 
 import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
+    
+    public static String smallifyDescription(String desc) {
+        // Start the smallified description with no HTML tags, and really short
+        String ret = cleanup(desc);
+        ret = ret.replaceAll("<[^>]*>", "");
+        ret = ret.substring(0, ret.length() > 451 ? 450 : ret.length() - 1);
+        ret += " ...";
+        
+        // Then find the first image in desc, and append that to the returned string
+        Pattern p = Pattern.compile("<img[^>]*>");
+        Matcher m = p.matcher(desc);
+        if (m.find()) {
+            ret += desc.substring(m.start(), m.end());
+        }
+        return ret;
+    }
     
     public static String removeNewLines(String s) {
         while (s.indexOf("\n") >= 0) {
@@ -14,9 +32,7 @@ public class Utils {
     }
     
     static String cleanTitle(String title) {
-        String ret = null;
-        ret = title.replaceAll("<b>", "").replace("</b>", "");
-        return ret;
+        return title.replaceAll("<b>", "").replace("</b>", "");
     }
     
     static String cleanup(String txt) {
@@ -80,6 +96,28 @@ public class Utils {
             .replace(new String(new byte[] { (byte)0xc2, (byte)0x98 }), "")
             .replace(new String(new byte[] { (byte)0xc2, (byte)0x99 }), "")
             .replace(new String(new byte[] { (byte)0xc2, (byte)0xa0 }), " ");
+        
+        // Ensure all images fit within the bounds of the blog
+        
+        Pattern img = Pattern.compile("<(img[^>]*)>");
+        Matcher m = img.matcher(ret);
+        while (m.find()) {
+            String imgtext = m.group(1);
+            // Remove height= and width= from all img tags
+            String imgtext2 = imgtext
+                .replaceAll("width=['\"][^'\"]*['\"]", "")
+                .replaceAll("height=['\"][^'\"]*['\"]", "")
+                .replaceAll("  ", " ");
+            // Then add style='max-width:100%' to all img tags
+            if (! imgtext2.contains("style='max-width")) {
+                imgtext2 += " style='max-width: 100%'";
+            }
+            // Then reassemble
+            ret = ret.substring(0, m.start())
+                + "<" + imgtext2 + ">"
+                + ret.substring(m.end());
+        }
+        
         return ret;
     }
     

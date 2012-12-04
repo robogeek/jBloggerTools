@@ -422,10 +422,10 @@ public class FromText {
             }
             
             String description = (row.descriptions != null && row.descriptions.size() > 0)
-                    ? row.descriptions.get(0) : null;
+                    ? Utils.smallifyDescription(row.descriptions.get(0)) : null;
             if (description == null)
                 description = (row.mediaDescription != null && row.mediaDescription.length() > 0)
-                    ? row.mediaDescription : null;
+                    ? Utils.smallifyDescription(row.mediaDescription) : null;
             
             String MC = 
                     (row.mediaCredit != null && row.mediaCredit.length() > 0)

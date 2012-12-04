@@ -246,22 +246,14 @@ public class Reader {
                 continue;
             }
             
+            String originTitle = null;
+            
             //System.out.println(elem.toString());
             //System.out.println(elem.getString("id"));
             //out.println("");
             //System.out.println(item.toString(4));
             out.println("");
             out.println("title: " + Utils.cleanTitle(Utils.cleanup(item.getString("title"))));
-            
-            JSONObject summary =  null;
-            try { summary = item.getJSONObject("summary"); } catch (Exception e) { summary = null; }
-            if (summary != null)
-                try { out.println("description: " + Utils.cleanup(Utils.removeNewLines(summary.getString("content")))); } catch (Exception e) { }
-            
-            JSONObject content = null;
-            try { content = item.getJSONObject("content"); } catch (Exception e) { content = null; }
-            if (content != null) 
-                try { out.println("description: " + Utils.cleanup(Utils.removeNewLines(content.getString("content")))); } catch (Exception e) { }
             
             JSONObject origin = null;
             try { origin = item.getJSONObject("origin"); } catch (Exception e) { origin = null; }
@@ -270,6 +262,36 @@ public class Reader {
                     out.println("originUrl: " + origin.getString("htmlUrl"));
                     out.println("originTitle: " + origin.getString("title"));
                     out.println("originStreamId: " + origin.getString("streamId"));
+                    originTitle = origin.getString("title");
+                } catch (Exception e) { }
+            
+            // Both GigaOM and CleanTechnica post long/full items through the source
+            // which Google Reader taps.  The regular feed however publishes just
+            // a teaser.  Shorten it to just the first bit (smallify) just 'cause.
+            JSONObject summary =  null;
+            try { summary = item.getJSONObject("summary"); } catch (Exception e) { summary = null; }
+            if (summary != null)
+                try {
+                    String desc = Utils.cleanup(Utils.removeNewLines(summary.getString("content")));
+                    if (originTitle != null
+                        && (originTitle.equals("CleanTechnica") || originTitle.equals("GigaOM"))
+                        ) {
+                        desc = Utils.smallifyDescription(desc);
+                    }
+                    out.println("description: " + desc);
+                } catch (Exception e) { }
+            
+            JSONObject content = null;
+            try { content = item.getJSONObject("content"); } catch (Exception e) { content = null; }
+            if (content != null) 
+                try {
+                    String desc = Utils.cleanup(Utils.removeNewLines(content.getString("content")));
+                    if (originTitle != null
+                        && (originTitle.equals("CleanTechnica") || originTitle.equals("GigaOM"))
+                        ) {
+                        desc = Utils.smallifyDescription(desc);
+                    }
+                    out.println("description: " + desc);
                 } catch (Exception e) { }
             
             JSONArray alternate = null;
