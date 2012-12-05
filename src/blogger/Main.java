@@ -26,25 +26,25 @@ public class Main {
             MalformedURLException, IllegalArgumentException, FeedException,
             FileNotFoundException, ParseException, Exception
     {
-        if (args.length > 0 && args[0].equals("fromtext")) FromText.main(args);
-        else if (args.length > 0 && args[0].equals("counttext")) new FromText().countItems(args[1]);
-        else if (args.length > 0 && args[0].equals("summary")) new FromText().generateSummary(args[1], args[2]);
-        else if (args.length > 0 && args[0].equals("addtag")) new FromText().addTag(args);
-        else if (args.length > 0 && args[0].equals("rmtags")) new FromText().rmTags(args);
-        else if (args.length > 0 && args[0].equals("rmdate")) new FromText().rmDate(args);
-        else if (args.length > 0 && args[0].equals("tagtitle")) new FromText().tagTitle(args);
-        else if (args.length > 0 && args[0].equals("sorttitle")) new FromText().sortTitle(args);
+        if (args.length > 0 && args[0].equals("fromtext"))        FromText.main(args);
+        else if (args.length > 0 && args[0].equals("counttext"))  new FromText().countItems(args[1]);
+        else if (args.length > 0 && args[0].equals("summary"))    new FromText().generateSummary(args);
+        else if (args.length > 0 && args[0].equals("addtag"))     new FromText().addTag(args);
+        else if (args.length > 0 && args[0].equals("rmtags"))     new FromText().rmTags(args);
+        else if (args.length > 0 && args[0].equals("rmdate"))     new FromText().rmDate(args);
+        else if (args.length > 0 && args[0].equals("tagtitle"))   new FromText().tagTitle(args);
+        else if (args.length > 0 && args[0].equals("sorttitle"))  new FromText().sortTitle(args);
         else if (args.length > 0 && args[0].equals("add2urilist")) new FromText().addToUriList(args);
         else if (args.length > 0 && args[0].equals("expungebyuri")) new FromText().expungeByUri(args);
-        else if (args.length > 0 && args[0].equals("merge")) new FromText().merge(args);
-        else if (args.length > 0 && args[0].equals("feed2text")) Feed2Text.main(args);
-        else if (args.length > 0 && args[0].equals("listblogs")) ListBlogs.main(args);
-        else if (args.length > 0 && args[0].equals("drupalcvt")) Converter.main(args);
+        else if (args.length > 0 && args[0].equals("merge"))      new FromText().merge(args);
+        else if (args.length > 0 && args[0].equals("feed2text"))  Feed2Text.main(args);
+        else if (args.length > 0 && args[0].equals("listblogs"))  ListBlogs.main(args);
+        else if (args.length > 0 && args[0].equals("drupalcvt"))  Converter.main(args);
         else if (args.length > 0 && args[0].equals("readertags")) Reader.listTags(args);
-        else if (args.length > 0 && args[0].equals("tag")) Reader.tagEntries(args);
-        else if (args.length > 0 && args[0].equals("starred")) Reader.starred(args);
+        else if (args.length > 0 && args[0].equals("tag"))        Reader.tagEntries(args);
+        else if (args.length > 0 && args[0].equals("starred"))    Reader.starred(args);
         else if (args.length > 0 && args[0].equals("feedfinder")) Reader.feedFinder(args);
-        else if (args.length > 0 && args[0].equals("feed")) Reader.feed(args);
+        else if (args.length > 0 && args[0].equals("feed"))       Reader.feed(args);
         else if (args.length > 0 && args[0].equals("encode")) {
             System.out.println(Utils.encoded(args[1]));
         }

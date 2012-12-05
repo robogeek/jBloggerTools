@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -303,7 +304,8 @@ public class FromText {
             
             String urls = "";
             for (String url : row.urls) {
-                urls += linkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url));
+                urls += linkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url))
+                    .replaceAll("@linkText@", url.substring(0, url.length() > 61 ? 60 : url.length() - 1));
             }
             
             String Sdesc = "";
@@ -377,7 +379,7 @@ public class FromText {
            +"@mediaCredit@\n";
     
     static final String postTemplate =
-            "<b>@title@</b><br/>\n"
+            "<div style='font-size: 175%; font-weight: bold; font-variant: small-caps; '>@title@</div><br/>\n"
            +"@descriptions@\n"
            +"@images@\n"
            +"@youtube@\n"
@@ -397,10 +399,10 @@ public class FromText {
 //           +"<br/><br/>\n";
     
     static final String descriptTemplate = "<p>@description@</p>\n";
-    static final String linkTemplate  = "<p><a href=\"@url@\">@url@</a></p>\n";
-    static final String smLinkTemplate  = "<p><span style='font-size: x-small;'><a href=\"@url@\">@url@</a></span></p>\n";
-    static final String thumbTemplate = "<p><img style='max-width: 150px' width='@width' height='@height' src=\"@imageurl@\"/></p>";
-    static final String mediaCreditTemplate = "<p>Credit: @mediaCredit@</p>\n";
+    static final String linkTemplate  = "<p><a href=\"@url@\">@linkText@</a></p>\n";
+    static final String smLinkTemplate  = "<p><span style='font-size: x-small;'><a href=\"@url@\">@linkText@</a></span></p>\n";
+    static final String thumbTemplate = "<p><img style='max-width: 200px' width='@width' height='@height' src=\"@imageurl@\"/></p>";
+    static final String mediaCreditTemplate = "<p><b>Credit</b>: @mediaCredit@</p>\n";
     
     static final String enclosureAudioTemplate = ""; // TODO audio enclosure template
     static final String enclosureVideoTemplate = ""; // TODO video enclosure template
@@ -409,10 +411,11 @@ public class FromText {
     
     static final String youtubeTemplate = "<iframe width='450' height='253' src='http://www.youtube.com/embed/@code@' frameborder='0' allowfullscreen></iframe>";
     
-    private void postSummary(String postedFile)
+    private void postSummary(String postedFile, String tagColor)
         throws java.net.MalformedURLException, FileNotFoundException
     {
         PrintStream out = new PrintStream(postedFile);
+        String lastUniqTag = null;
         // for (Row row : posted) {
         for (Row row = posted.peekLast(); row != null; row = posted.peekLast()) {
             posted.remove(row);
@@ -434,12 +437,28 @@ public class FromText {
             
             String urls = "";
             for (String url : row.urls) {
-                urls += smLinkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url));
+                urls += smLinkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url))
+                    .replaceAll("@linkText@", url.substring(0, url.length() > 61 ? 60 : url.length() - 1));
+            }
+            
+            // Colorize the tag (if any) in the title
+            // But colorize it only the first time the tag is used
+            String rowTitle = row.title;
+            String reMatchTag = "^([A-Za-z0-9\\s]+) - ";
+            Pattern p = Pattern.compile(reMatchTag);
+            Matcher m = p.matcher(rowTitle);
+            if (m.find()) {
+                String tag = m.group(1);
+                if (lastUniqTag == null || ! lastUniqTag.equals(tag)) {
+                    lastUniqTag = tag;
+                    String csstag = "<span style='color: "+tagColor+";'>"+ tag +"</span>";
+                    rowTitle = rowTitle.replaceAll(tag, csstag);
+                }
             }
             
             out.println("");
             out.println(
-                    postTemplate.replaceAll("@title@", Matcher.quoteReplacement(row.title))
+                    postTemplate.replaceAll("@title@", Matcher.quoteReplacement(rowTitle))
                         .replaceAll("@descriptions@",  
                             (description != null && description.length() > 0)
                             ? Matcher.quoteReplacement(description) : "")
@@ -497,15 +516,17 @@ public class FromText {
         return Matcher.quoteReplacement("");
     }
     
-    String authorName = null; // "David Herron";
-    String userName   = null; // "reikiman@gmail.com";
-    String userPasswd = null; // "ellhnpezyfoxbqcn";
+    String authorName = null; 
+    String userName   = null; 
+    String userPasswd = null; 
     
-    String blogId = null; // "4358407941295111084"; // "3621272226038322596";
-    String inputFile = null; // "input.txt";
+    String blogId = null; 
+    String inputFile = null; 
     
     String postedFile = null;
     String notPostedFile = null;
+    
+    String tagColor = null;
     
     void run(String[] args) 
             throws ParserConfigurationException, SAXException, IOException,
@@ -520,6 +541,7 @@ public class FromText {
         
         if (args.length >= 7) postedFile    = args[6];
         if (args.length >= 8) notPostedFile = args[7];
+        if (args.length >= 9 && args[8].length() > 0) tagColor = args[8];
         
         System.out.println("author name: " + authorName);
         System.out.println("user name: " + userName);
@@ -566,7 +588,7 @@ public class FromText {
             e.printStackTrace();
         }
         
-        if (postedFile != null) postSummary(postedFile);
+        if (postedFile != null) postSummary(postedFile, tagColor);
         if (notPostedFile != null) {
             writeRowsToFile(notPostedFile, rows);
         }
@@ -579,12 +601,19 @@ public class FromText {
         System.out.println("number of items: " + Integer.toString(rows.size()));
     }
     
-    public void generateSummary(String fnIn, String fnOut) 
+    public void generateSummary(String[] args) 
         throws FileNotFoundException, IOException 
     {
+        
+        String fnIn = args[1];
+        String fnOut = args[2];
+        String tagColor = null;
+        
+        if (args.length >= 4) tagColor = args[3];
+        
         parseText(new File(fnIn));
         posted = rows;
-        postSummary(fnOut);
+        postSummary(fnOut, tagColor);
     }
     
     public void rmDate(String[] args)
