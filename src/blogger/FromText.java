@@ -445,14 +445,16 @@ public class FromText {
             // But colorize it only the first time the tag is used
             String rowTitle = row.title;
             String reMatchTag = "^([A-Za-z0-9\\s]+) - ";
-            Pattern p = Pattern.compile(reMatchTag);
-            Matcher m = p.matcher(rowTitle);
-            if (m.find()) {
-                String tag = m.group(1);
-                if (lastUniqTag == null || ! lastUniqTag.equals(tag)) {
-                    lastUniqTag = tag;
-                    String csstag = "<span style='color: "+tagColor+";'>"+ tag +"</span>";
-                    rowTitle = rowTitle.replaceAll(tag, csstag);
+            if (tagColor != null) {
+                Pattern p = Pattern.compile(reMatchTag);
+                Matcher m = p.matcher(rowTitle);
+                if (m.find()) {
+                    String tag = m.group(1);
+                    if (lastUniqTag == null || ! lastUniqTag.equals(tag)) {
+                        lastUniqTag = tag;
+                        String csstag = "<span style='color: "+tagColor+";'>"+ tag +"</span>";
+                        rowTitle = rowTitle.replaceAll(tag, csstag);
+                    }
                 }
             }
             
