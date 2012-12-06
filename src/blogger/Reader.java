@@ -274,8 +274,11 @@ public class Reader {
                 try {
                     String desc = Utils.cleanup(Utils.removeNewLines(summary.getString("content")));
                     if (originTitle != null
-                        && (originTitle.equals("CleanTechnica") || originTitle.equals("GigaOM"))
-                        ) {
+                        && (
+                            originTitle.equals("CleanTechnica")
+                         || originTitle.equals("GigaOM")
+                         || originTitle.equals("Business Insider")
+                        )) {
                         desc = Utils.smallifyDescription(desc);
                     }
                     out.println("description: " + desc);
@@ -287,8 +290,11 @@ public class Reader {
                 try {
                     String desc = Utils.cleanup(Utils.removeNewLines(content.getString("content")));
                     if (originTitle != null
-                        && (originTitle.equals("CleanTechnica") || originTitle.equals("GigaOM"))
-                        ) {
+                        && (
+                            originTitle.equals("CleanTechnica")
+                         || originTitle.equals("GigaOM")
+                         || originTitle.equals("Business Insider")
+                        )) {
                         desc = Utils.smallifyDescription(desc);
                     }
                     out.println("description: " + desc);

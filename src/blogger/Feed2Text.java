@@ -84,6 +84,9 @@ public class Feed2Text {
             Item   rssItem  = null;
             Entry  atomItem = null;
             
+            // Flags for sites that get special treatment
+            boolean isBusinessInsider = false;
+            
             Date publ = entry.getPublishedDate();
             if (publ == null) publ = new Date();
             
@@ -95,6 +98,7 @@ public class Feed2Text {
                 // entry.getPublishedDate().toString());
             System.out.println("url: " + entry.getLink());
             System.out.println("uri: " + entry.getUri());
+            if (entry.getUri().contains("www.businessinsider.com")) isBusinessInsider = true;
             for (Object oo : entry.getCategories()) {
                 SyndCategoryImpl category = (SyndCategoryImpl) oo;
                 String tagName = category.getName();
@@ -160,7 +164,11 @@ public class Feed2Text {
             }
             SyndContent desc = entry.getDescription();
             if (desc != null && desc.getValue().length() > 0) {
-                String d = Utils.cleanup(Utils.removeNewLines(desc.getValue()));
+                String d = "";
+                if (isBusinessInsider)
+                    d = Utils.smallifyDescription(Utils.removeNewLines(desc.getValue()));
+                else
+                    d = Utils.cleanup(Utils.removeNewLines(desc.getValue()));
                 System.out.println("description: " + d);
             }
             for (Object oencl : entry.getEnclosures()) {

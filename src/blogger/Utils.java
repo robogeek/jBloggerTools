@@ -35,7 +35,9 @@ public class Utils {
     }
     
     static String cleanTitle(String title) {
-        return title.replaceAll("<b>", "").replace("</b>", "");
+        return title.replaceAll("<b>", "")
+            .replace("</b>", "")
+            .replace(new String(new byte[] { (byte)0xD1 }), "");
     }
     
     static String cleanup(String txt) {

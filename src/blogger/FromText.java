@@ -614,7 +614,11 @@ public class FromText {
         if (args.length >= 4) tagColor = args[3];
         
         parseText(new File(fnIn));
-        posted = rows;
+        // Simulate posting the items
+        for (Row row = rows.peekLast(); row != null; row = rows.peekLast()) {
+            rows.remove(row);
+            posted.addLast(row);
+        }
         postSummary(fnOut, tagColor);
     }
     
