@@ -1,6 +1,9 @@
 package blogger;
 
 import java.net.URLEncoder;
+import java.net.URLConnection;
+import java.net.URL;
+import java.net.HttpURLConnection;
 import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -148,6 +151,56 @@ public class Utils {
         
         return ret;
     }
+    
+    static String urlexpander(String url) 
+        throws java.net.MalformedURLException, java.io.IOException
+    {
+        return urlexpander(new URL(url));
+    }
+    
+    static String urlexpander(URL url)
+        throws java.net.MalformedURLException, java.io.IOException
+    {
+        HttpURLConnection c = (HttpURLConnection)url.openConnection();
+        HttpURLConnection.setFollowRedirects(true);
+        c.setInstanceFollowRedirects(true);
+        c.setConnectTimeout(15000);
+        c.setReadTimeout(15000);
+        c.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; ru; rv:1.9.0.11) Gecko/2009060215 Firefox/3.0.11 (.NET CLR 3.5.30729)");
+        c.connect();
+        c.getInputStream();
+        return c.getURL().toString();
+    }
+    
+    /*
+    static String cleanurl(String url) {
+        return cleanurl(new URL(url));
+    }
+    
+    static String cleanurl(URL url) {
+        String qry = url.getQuery();
+        if (qry == null || qry.length() <= 0) return url;
+        
+        String[] args = qry.split("&");
+        String newQry = "";
+        for (int i = 0; i < args.length; i++) {
+            // List here the query arguments to remove from URL's
+            if (args[i].startsWith("utm_source")
+             || args[i].startsWith("utm_medium")
+             || args[i].startsWith("utm_campaign")
+                ) {
+                continue;
+            }
+            // else 
+            if (newQry.length() <= 0) {
+                newQry += args[i];
+            } else {
+                newQry += "&" + args[i];
+            }
+        }
+        
+    }
+    */
     
     /**
      * Run text through URLEncoder
