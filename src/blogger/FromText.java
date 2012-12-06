@@ -313,10 +313,14 @@ public class FromText {
                 fakeTime += 120 * 1000;  // Fake an advance of time because blogger lops off seconds
             }
             
+            LinkedList<String> outUrls = new LinkedList<String>();
             String urls = "";
             for (String url : row.urls) {
+                url = Utils.urlexpander(url);
+                if (outUrls.contains(url)) continue;
+                outUrls.addLast(url);
                 urls += linkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url))
-                    .replaceAll("@linkText@", url.substring(0, url.length() > 61 ? 60 : url.length() - 1));
+                    .replaceAll("@linkText@", url.substring(0, url.length() > 71 ? 70 : url.length() - 1));
             }
             
             String Sdesc = "";
@@ -423,7 +427,7 @@ public class FromText {
     static final String youtubeTemplate = "<iframe width='450' height='253' src='http://www.youtube.com/embed/@code@' frameborder='0' allowfullscreen></iframe>";
     
     private void postSummary(String postedFile, String tagColor)
-        throws java.net.MalformedURLException, FileNotFoundException
+        throws java.net.MalformedURLException, FileNotFoundException, java.io.IOException
     {
         PrintStream out = new PrintStream(postedFile);
         String lastUniqTag = null;
@@ -446,8 +450,12 @@ public class FromText {
                     ? mediaCreditTemplate.replaceAll("@mediaCredit@", Matcher.quoteReplacement(row.mediaCredit))
                     : null;
             
+            LinkedList<String> outUrls = new LinkedList<String>();
             String urls = "";
             for (String url : row.urls) {
+                url = Utils.urlexpander(url);
+                if (outUrls.contains(url)) continue;
+                outUrls.addLast(url);
                 urls += smLinkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url))
                     .replaceAll("@linkText@", url.substring(0, url.length() > 61 ? 60 : url.length() - 1));
             }
