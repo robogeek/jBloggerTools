@@ -11,7 +11,10 @@ public class Utils {
         // Start the smallified description with no HTML tags, and really short
         String ret = cleanup(desc);
         ret = ret.replaceAll("<[^>]*>", "");
-        ret = ret.substring(0, ret.length() > 451 ? 450 : ret.length() - 1);
+        String retsave = ret;
+        try { ret = ret.substring(0, ret.length() > 451 ? 450 : ret.length() - 1); } catch (Exception e) {
+            ret = retsave;
+        }
         ret += " ...";
         
         // Then find the first image in desc, and append that to the returned string
@@ -113,9 +116,14 @@ public class Utils {
                 imgtext2 += " style='max-width: 100%'";
             }
             // Then reassemble
-            ret = ret.substring(0, m.start())
+            String retsave = ret;
+            try {
+                ret = ret.substring(0, m.start() >= 0 ? m.start() : 0)
                 + "<" + imgtext2 + ">"
                 + ret.substring(m.end());
+            } catch (Exception e) {
+                ret = retsave;
+            }
         }
         
         return ret;
