@@ -7,6 +7,11 @@ import java.util.regex.Pattern;
 
 public class Utils {
     
+    /**
+     * Radically shorten text by removing all HTML tags, cutting the total length to 450 characters,
+     * and leaving just one image tag.  This is meant for those sites that publish full articles
+     * in RSS feeds and/or publish a bunch of excess HTML in their feed.  
+     **/
     public static String smallifyDescription(String desc) {
         // Start the smallified description with no HTML tags, and really short
         String ret = cleanup(desc);
@@ -26,6 +31,9 @@ public class Utils {
         return ret;
     }
     
+    /**
+     * Remove all the newline characters from strings.
+     **/
     public static String removeNewLines(String s) {
         while (s.indexOf("\n") >= 0) {
             String n = s.substring(0, s.indexOf("\n")) + s.substring(s.indexOf("\n") + 1);
@@ -34,12 +42,22 @@ public class Utils {
         return s;
     }
     
+    /**
+     * Remove excess junk from titles that make titles render badly.
+     **/
     static String cleanTitle(String title) {
         return title.replaceAll("<b>", "")
             .replace("</b>", "")
             .replace(new String(new byte[] { (byte)0xD1 }), "");
     }
     
+    /**
+     * General cleanup of article text so that it renders nicely.  Removes all 1x1 images.
+     * Removes unicode or UTF-8 sequences that render badly.  Remove some links like the ones
+     * feedburner inserts for sharing by email or whatnot.  Remove certain empty tags.
+     * Change all images to remove height= and width= replacing it with a max-width=100% so
+     * that images automatically fit into the blog.
+     **/
     static String cleanup(String txt) {
         String ret = null;
         ret = txt.replaceAll("<iframe[^>]*>[^<]*</iframe>", "")
@@ -131,6 +149,9 @@ public class Utils {
         return ret;
     }
     
+    /**
+     * Run text through URLEncoder
+     **/
     static String encoded(String str) {
         try {
             return URLEncoder.encode(str, "UTF-8");

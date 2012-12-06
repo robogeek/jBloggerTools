@@ -22,10 +22,17 @@ import java.text.Normalizer;
 
 public class Reader {
     
+    /**
+     * As part of Google ClientLogin process, do the login then get the authentication token.
+     **/
     public static String getAuthToken(String userName, String userPasswd) {
         return ClientLogin.getAuthToken(ClientLogin.GOOGLE, userName, userPasswd, "reader", "exampleCo-exampleApp-1");
     }
     
+    /**
+     * Retrieve the data for a given URL, after having logging in using ClientLogin.
+     * Provide the URL and the authToken.
+     **/
     public static String dataForUrl(URL url, String token)
         throws java.io.IOException, java.net.MalformedURLException
     {
@@ -60,6 +67,9 @@ public class Reader {
         return data;
     }
     
+    /**
+     * Query Google Reader to list the tags the user has created in their account.
+     **/
     public static void listTags(String[] args)
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
@@ -89,6 +99,9 @@ public class Reader {
         }
     }
     
+    /**
+     * Find recommended feeds for given keywords.
+     **/
     public static void feedFinder(String[] args)
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
@@ -111,6 +124,9 @@ public class Reader {
         out.println(jso.toString(4));
     }
     
+    /**
+     * List the entries for a given tag.
+     **/
     public static void tagEntries(String[] args)
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
@@ -148,6 +164,9 @@ public class Reader {
         System.out.println(jso.toString(4));*/
     }
     
+    /**
+     * Use Google Reader to retrieve the contents of a feed.
+     **/
     public static void feed(String[] args)
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
@@ -184,6 +203,9 @@ public class Reader {
         System.out.println(jso.toString(4));*/
     }
     
+    /**
+     * Return the items the user has star'd in their account.
+     **/
     public static void starred(String[] args) 
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException
@@ -216,6 +238,10 @@ public class Reader {
         printFeed2Text(new JSONObject(json), outfn, oldest);
     }
     
+    /**
+     * Utility function to print the contents of a feed in the text format suitable
+     * for import via the FromText class.
+     **/
     static void printFeed2Text(JSONObject feed, String outfn, long oldest)  
         throws java.net.MalformedURLException, java.io.IOException, com.google.gdata.util.AuthenticationException,
             org.json.JSONException

@@ -22,7 +22,9 @@ import org.xml.sax.SAXException;
 
 public class FromText {
 
-    
+    /**
+     * Wraps thumbnail information retrieved from feeds, such as youtube query results.
+     **/
     public class Thumbnail {
         public Thumbnail() {
             this.url    = null;
@@ -55,6 +57,9 @@ public class FromText {
         }
     }
         
+    /**
+     * Represents a row of a text file.
+     **/
     public class Row {
         
         public Row() {
@@ -228,6 +233,9 @@ public class FromText {
         posted = new LinkedList<Row>();
     }
     
+    /**
+     * Parse a named file using the text format.  The items go into the "rows" list.
+     **/
     private void parseText(File inputFile)
         throws java.io.FileNotFoundException, java.io.IOException
     {
@@ -282,6 +290,9 @@ public class FromText {
         fr.close();
     }
     
+    /**
+     * Post the items in "rows" to the given blog.
+     **/
     private void postIndividually(Blog blog)
         throws com.google.gdata.util.ServiceException, java.io.IOException,
             java.net.MalformedURLException, ParseException
