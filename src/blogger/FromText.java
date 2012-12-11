@@ -316,7 +316,7 @@ public class FromText {
             LinkedList<String> outUrls = new LinkedList<String>();
             String urls = "";
             for (String url : row.urls) {
-                url = Utils.urlexpander(url);
+                url = Utils.cleanurl(Utils.urlexpander(url));
                 if (outUrls.contains(url)) continue;
                 outUrls.addLast(url);
                 urls += linkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url))
@@ -401,7 +401,7 @@ public class FromText {
            +"@enclosures@\n"
            +"@urls@\n"
            +"@mediaCredit@\n"
-           +"<br/><br/>\n";
+           +"<br/>\n";
     
 //    static final String postTemplate2 =
 //            "<p><b>@title@</b></p>\n"
@@ -411,7 +411,7 @@ public class FromText {
 //           +"@enclosures@\n"
 //           +"<p><a href=\"@url@\">@url@</a></p>\n"
 //           +"@mediaCredit@\n"
-//           +"<br/><br/>\n";
+//           +"<br/>\n";
     
     static final String descriptTemplate = "<p>@description@</p>\n";
     static final String linkTemplate  = "<p><a href=\"@url@\">@linkText@</a></p>\n";
@@ -453,7 +453,7 @@ public class FromText {
             LinkedList<String> outUrls = new LinkedList<String>();
             String urls = "";
             for (String url : row.urls) {
-                url = Utils.urlexpander(url);
+                url = Utils.cleanurl(Utils.urlexpander(url));
                 if (outUrls.contains(url)) continue;
                 outUrls.addLast(url);
                 urls += smLinkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url))
