@@ -18,6 +18,7 @@ public class Utils {
     public static String smallifyDescription(String desc) {
         // Start the smallified description with no HTML tags, and really short
         String ret = cleanup(desc);
+        // Get rid of any tag, period
         ret = ret.replaceAll("<[^>]*>", "");
         String retsave = ret;
         try { ret = ret.substring(0, ret.length() > 451 ? 450 : ret.length() - 1); } catch (Exception e) {
@@ -133,20 +134,12 @@ public class Utils {
             String imgtext2 = imgtext
                 .replaceAll("width=['\"][^'\"]*['\"]", "")
                 .replaceAll("height=['\"][^'\"]*['\"]", "")
-                .replaceAll("  ", " ");
+                /*.replaceAll("  ", " ")*/;
             // Then add style='max-width:100%' to all img tags
             if (! imgtext2.contains("style='max-width")) {
-                imgtext2 += " style='max-width: 100%'";
+                imgtext2 += " style='max-width: 100%; clear: both;'";
             }
-            // Then reassemble
-            String retsave = ret;
-            try {
-                ret = ret.substring(0, m.start() >= 0 ? m.start() : 0)
-                + "<" + imgtext2 + ">"
-                + ret.substring(m.end());
-            } catch (Exception e) {
-                ret = retsave;
-            }
+            ret = ret.replace(imgtext, imgtext2);
         }
         
         return ret;
@@ -161,6 +154,8 @@ public class Utils {
     static String urlexpander(URL url)
         throws java.net.MalformedURLException, java.io.IOException
     {
+        // The idea here is that with .setFollowRedirects(true), Java will go ahead
+        // and traverse the redirects from the short URL service(s)
         HttpURLConnection c = (HttpURLConnection)url.openConnection();
         HttpURLConnection.setFollowRedirects(true);
         c.setInstanceFollowRedirects(true);
@@ -168,19 +163,33 @@ public class Utils {
         c.setReadTimeout(15000);
         c.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; ru; rv:1.9.0.11) Gecko/2009060215 Firefox/3.0.11 (.NET CLR 3.5.30729)");
         c.connect();
+        // Once we do this ...
         c.getInputStream();
+        // ... .getURL() returns the right URL
         return c.getURL().toString();
     }
     
-    /*
-    static String cleanurl(String url) {
+    static String cleanurl(String url) 
+        throws java.net.MalformedURLException
+    {
         return cleanurl(new URL(url));
     }
     
-    static String cleanurl(URL url) {
+    /**
+     * Clean up the Internet by removing unneeded cruft from URL's, which in turn
+     * will let us remove excess URL's from postings created by jBloggerTools.
+     * The idea is that feedburner and that ilk are adding extra things as query arguments
+     * but which are unnecessary to preserve.  In particular, the process of removing duplicate
+     * URL's from a posting is getting tripped up by these extra arguments.  
+     **/
+    static String cleanurl(URL url)
+        throws java.net.MalformedURLException
+    {
         String qry = url.getQuery();
-        if (qry == null || qry.length() <= 0) return url;
+        if (qry == null || qry.length() <= 0) return url.toString();
         
+        // Split the query string by '&' to get at the individual arguments
+        // Any argument we don't like does not get added to the newQry string
         String[] args = qry.split("&");
         String newQry = "";
         for (int i = 0; i < args.length; i++) {
@@ -191,7 +200,10 @@ public class Utils {
                 ) {
                 continue;
             }
-            // else 
+            // else
+            // Add the argument string to newQry
+            // Note that at no time did we URLDecode the strings
+            // Hence it is safe to just glue them back together this way
             if (newQry.length() <= 0) {
                 newQry += args[i];
             } else {
@@ -199,8 +211,13 @@ public class Utils {
             }
         }
         
+        // Get a query-less version of the input URL
+        URL newUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath());
+        String sNewUrl = newUrl.toString();
+        // If there is a new query string, append it
+        if (newQry.length() > 0) sNewUrl += "?" + newQry;
+        return sNewUrl;
     }
-    */
     
     /**
      * Run text through URLEncoder
