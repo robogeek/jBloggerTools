@@ -304,6 +304,9 @@ public class Reader {
                             originTitle.equals("CleanTechnica")
                          || originTitle.equals("GigaOM")
                          || originTitle.equals("Business Insider")
+                         || originTitle.contains("Business Wire")
+                         || originTitle.equals("ThinkProgress")
+                         || originTitle.contains("Inhabitat")
                         )) {
                         desc = Utils.smallifyDescription(desc);
                     }
@@ -320,6 +323,9 @@ public class Reader {
                             originTitle.equals("CleanTechnica")
                          || originTitle.equals("GigaOM")
                          || originTitle.equals("Business Insider")
+                         || originTitle.contains("Business Wire")
+                         || originTitle.equals("ThinkProgress")
+                         || originTitle.contains("Inhabitat")
                         )) {
                         desc = Utils.smallifyDescription(desc);
                     }
