@@ -30,7 +30,7 @@ public class Utils {
         Pattern p = Pattern.compile("<img[^>]*>");
         Matcher m = p.matcher(desc);
         if (m.find()) {
-            ret += desc.substring(m.start(), m.end());
+            ret += "<div style='clear:both'>" + desc.substring(m.start(), m.end()) + "</div>";
         }
         return ret;
     }
