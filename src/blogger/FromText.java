@@ -394,7 +394,7 @@ public class FromText {
            +"@mediaCredit@\n";
     
     static final String postTemplate =
-            "<div style='font-size: 175%; font-weight: bold; font-variant: small-caps; '>@title@</div><br/>\n"
+            "<div style='font-size: 175%; font-weight: bold; font-variant: small-caps; '>@title@</div>\n"
            +"@descriptions@\n"
            +"@images@\n"
            +"@youtube@\n"
@@ -418,9 +418,6 @@ public class FromText {
     static final String smLinkTemplate  = "<p><span style='font-size: x-small;'><a href=\"@url@\">@linkText@</a></span></p>\n";
     static final String thumbTemplate = "<p><img style='max-width: 200px' width='@width' height='@height' src=\"@imageurl@\"/></p>";
     static final String mediaCreditTemplate = "<p><b>Credit</b>: @mediaCredit@</p>\n";
-    
-    static final String enclosureAudioTemplate = ""; // TODO audio enclosure template
-    static final String enclosureVideoTemplate = ""; // TODO video enclosure template
     
     static final String imageTemplate = "<p><img style='max-width: 100%' src='@imageurl@'/></p>";
     
@@ -492,7 +489,7 @@ public class FromText {
                             : "")
                         .replaceAll("@enclosures@", 
                             (row.enclosureUrl != null && row.enclosureUrl.length() > 0)
-                            ? Matcher.quoteReplacement(generateEnclosurePlayer(row.enclosureUrl, row.enclusureMIME))
+                            ? generateEnclosureSummary(row.enclosureUrl, row.enclusureMIME)
                             : ""
                         )
                     );
@@ -531,10 +528,46 @@ public class FromText {
         return "";
     }
     
+    String mediaSummaryTemplate = "<a href='@fileURL@'>@contentType@ @fileURL@</a>";
+    
+    String generateEnclosureSummary(String enclUrl, String enclType) {
+        return Matcher.quoteReplacement(
+            mediaSummaryTemplate
+                .replaceAll("@contentType@", enclType)
+                .replaceAll("@fileURL@", enclUrl)
+        );
+    }
+    
+    
+    // This relies on MediaElementJS -- http://mediaelementjs.com/#api
+    
+    String mediaTemplate = "<@tagName@ style='width:100%;height:100%;max-width:100%;'>\n"
+        + "<source type='@contentType@' src='@fileURL@' />\n"
+        + "\n"
+        + "<object width='320' height='240' type='application/x-shockwave-flash' data='http://audio.davidherron.com/MediaElement/mediaelement-2.10.1/build/flashmediaelement.swf'>\n"
+        + "    <param name='movie' value='http://audio.davidherron.com/MediaElement/mediaelement-2.10.1/build/flashmediaelement.swf' />\n"
+        + "    <param name='flashvars' value='controls=true&file=@encodedFileURL@' />\n"
+        + "</object>\n"
+        + "</@tagName@>";
+
     String generateEnclosurePlayer(String enclUrl, String enclType) {
+        String tagName = "";
+        if (enclType.startsWith("audio")) tagName = "audio";
+        if (enclType.startsWith("video")) tagName = "video";
         
-        // TODO implement generateEnclosurePlayer
-        return Matcher.quoteReplacement("");
+        String encodedFileURL = Utils.encoded(enclUrl);
+        
+        return Matcher.quoteReplacement(
+            mediaTemplate
+                .replaceAll("@tagName@", tagName)
+                .replaceAll("@contentType@", enclType)
+                .replaceAll("@fileURL@", enclUrl)
+                .replaceAll("@encodedFileURL@", encodedFileURL)
+            +"<br/>\n"
+            + "<p>"+ mediaSummaryTemplate
+                .replaceAll("@contentType@", enclType)
+                .replaceAll("@fileURL@", enclUrl) + "</p>"
+        );
     }
     
     String authorName = null; 
