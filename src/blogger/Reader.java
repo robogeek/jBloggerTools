@@ -147,7 +147,8 @@ public class Reader {
         long then = now - (3600 * 1000 * 24 * 7); // should be 7 days
         String sThen = Long.toString(then);*/
         
-        int nHours = Integer.parseInt(hours);
+        int nHours = 0;
+        try { nHours = Integer.parseInt(hours); } catch (Exception e) { }
         long oldest = nHours > 0 ? System.currentTimeMillis() - (nHours * 60 * 60 * 1000) : 0;
         //if (oldest > 0) System.out.println("oldest=" + new Date(oldest).toString());
         
@@ -187,7 +188,8 @@ public class Reader {
         long then = now - (3600 * 1000 * 24 * 7); // should be 7 days
         String sThen = Long.toString(then);*/
         
-        int nHours = Integer.parseInt(hours);
+        int nHours = 0;
+        try { nHours = Integer.parseInt(hours); } catch (Exception e) { }
         long oldest = nHours > 0 ? System.currentTimeMillis() - (nHours * 60 * 60 * 1000) : 0;
         //if (oldest > 0) System.out.println("oldest=" + new Date(oldest).toString());
         
@@ -225,7 +227,8 @@ public class Reader {
         long then = now - (3600 * 1000 * 24 * 7); // should be 7 days
         String sThen = Long.toString(then);*/
         
-        int nHours = Integer.parseInt(hours);
+        int nHours = 0;
+        try { nHours = Integer.parseInt(hours); } catch (Exception e) { }
         long oldest = nHours > 0 ? System.currentTimeMillis() - (nHours * 60 * 60 * 1000) : 0;
         //if (oldest > 0) System.out.println("oldest=" + new Date(oldest).toString());
         
