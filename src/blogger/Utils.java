@@ -64,6 +64,7 @@ public class Utils {
      **/
     static String cleanup(String txt) {
         String ret = null;
+        // System.out.println("cleanup: " + txt);
         ret = txt.replaceAll("<iframe[^>]*>[^<]*</iframe>", "")
             // Get rid of all 1x1 images
             .replaceAll("<img[^h>]*height=['\"]1['\"][^w]*width=['\"]1['\"][^<]*</img>", "")
@@ -127,19 +128,26 @@ public class Utils {
         // Ensure all images fit within the bounds of the blog
         
         Pattern img = Pattern.compile("<(img[^>]*)>");
+        // System.out.println("cleanup: " + ret);
         Matcher m = img.matcher(ret);
         while (m.find()) {
             String imgtext = m.group(1);
+            // System.out.println("BEFORE: " + imgtext);
+            if (imgtext.endsWith("/")) {
+                String nImgText = imgtext.substring(0, imgtext.length() - 1);
+                imgtext = nImgText;
+            }
             // Remove height= and width= from all img tags
             String imgtext2 = imgtext
                 .replaceAll("width=['\"][^'\"]*['\"]", "")
                 .replaceAll("height=['\"][^'\"]*['\"]", "")
                 /*.replaceAll("  ", " ")*/;
             // Then add style='max-width:100%' to all img tags
-            if (! imgtext2.contains("style='max-width")) {
+            if (! imgtext2.contains("style")) { //='max-width")) {
                 imgtext2 += " style='max-width: 100%; clear: both;'";
             }
             ret = ret.replace(imgtext, imgtext2);
+            // System.out.println("AFTER: " + imgtext2);
         }
         
         return ret;
