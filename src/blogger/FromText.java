@@ -549,25 +549,35 @@ public class FromText {
         + "    <param name='flashvars' value='controls=true&file=@encodedFileURL@' />\n"
         + "</object>\n"
         + "</@tagName@>";
+        
+    String imgEnclTemplate = "<div style='max-width: 100%;'><img style='max-width: 100%' src='@imgUrl@' /></div>";
 
     String generateEnclosurePlayer(String enclUrl, String enclType) {
         String tagName = "";
         if (enclType.startsWith("audio")) tagName = "audio";
         if (enclType.startsWith("video")) tagName = "video";
         
-        String encodedFileURL = Utils.encoded(enclUrl);
-        
-        return Matcher.quoteReplacement(
-            mediaTemplate
-                .replaceAll("@tagName@", tagName)
-                .replaceAll("@contentType@", enclType)
-                .replaceAll("@fileURL@", enclUrl)
-                .replaceAll("@encodedFileURL@", encodedFileURL)
-            +"<br/>\n"
-            + "<p>"+ mediaSummaryTemplate
-                .replaceAll("@contentType@", enclType)
-                .replaceAll("@fileURL@", enclUrl) + "</p>"
-        );
+        if (tagName.equals("audio") || tagName.equals("video")) {
+            String encodedFileURL = Utils.encoded(enclUrl);
+            return Matcher.quoteReplacement(
+                mediaTemplate
+                    .replaceAll("@tagName@", tagName)
+                    .replaceAll("@contentType@", enclType)
+                    .replaceAll("@fileURL@", enclUrl)
+                    .replaceAll("@encodedFileURL@", encodedFileURL)
+                +"<br/>\n"
+                + "<p>"+ mediaSummaryTemplate
+                    .replaceAll("@contentType@", enclType)
+                    .replaceAll("@fileURL@", enclUrl) + "</p>"
+            );
+        }
+        if (enclType.startsWith("image")) {
+            return Matcher.quoteReplacement(
+                imgEnclTemplate
+                    .replaceAll("@imgUrl@", enclUrl)
+            );
+        }
+        return "";
     }
     
     String authorName = null; 
