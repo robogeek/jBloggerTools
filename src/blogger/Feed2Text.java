@@ -16,6 +16,7 @@ import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -73,8 +74,14 @@ public class Feed2Text {
         thefeed = input.build(reader);
     }
     
-    void printEntries() {
-        System.out.println("");
+    void printEntries(String outfn)
+        throws java.io.FileNotFoundException
+    {
+        PrintStream out = System.out;
+        if (outfn != null && ! outfn.equals("-")) {
+            out = new PrintStream(outfn);
+        }
+        out.println("");
         // ?? print out header information ??
         for (Object o : thefeed.getEntries()) {
             SyndEntryImpl entry = (SyndEntryImpl)o;
@@ -93,40 +100,40 @@ public class Feed2Text {
 //            if (oItem != null) System.out.println("wireEntry: " + oItem.toString()); 
             if (oItem instanceof Item)  rssItem  = (Item)  oItem;
             if (oItem instanceof Entry) atomItem = (Entry) oItem;
-            System.out.println("title: " + Utils.cleanTitle(entry.getTitle())); 
-            System.out.println("date: " + Long.toString(publ.getTime()) +" "+ Long.toString(publ.getTimezoneOffset()));
+            out.println("title: " + Utils.cleanTitle(entry.getTitle())); 
+            out.println("date: " + Long.toString(publ.getTime()) +" "+ Long.toString(publ.getTimezoneOffset()));
                 // entry.getPublishedDate().toString());
-            System.out.println("url: " + entry.getLink());
-            System.out.println("uri: " + entry.getUri());
+            out.println("url: " + entry.getLink());
+            out.println("uri: " + entry.getUri());
             if (entry.getUri().contains("www.businessinsider.com")) isBusinessInsider = true;
             for (Object oo : entry.getCategories()) {
                 SyndCategoryImpl category = (SyndCategoryImpl) oo;
                 String tagName = category.getName();
                 if (tagName.startsWith("http:")) continue;
-                System.out.println("tag: " + tagName);
+                out.println("tag: " + tagName);
             }
-            if (rssItem != null) {
-                System.out.println("rssguid: " + Utils.removeNewLines(rssItem.getGuid().toString()));
-                // System.out.println("rssDescription: " + rssItem.getDescription());
+            if (rssItem != null && rssItem.getGuid() != null) {
+                out.println("rssguid: " + Utils.removeNewLines(rssItem.getGuid().toString()));
+                // out.println("rssDescription: " + rssItem.getDescription());
             }
             if (atomItem != null) {
-                System.out.println("atomId: " + atomItem.getId());
-                System.out.println("atomSummary: " 
+                out.println("atomId: " + atomItem.getId());
+                out.println("atomSummary: " 
                         + (atomItem.getSummary() != null ? atomItem.getSummary() : ""));
 //                for (Object oModule : atomItem.getModules()) {
-//                    System.out.println("atomModule: " + oModule.toString());
+//                    out.println("atomModule: " + oModule.toString());
 //                }
-//                System.out.println("atomMarkup: " + atomItem.getForeignMarkup().toString());
+//                out.println("atomMarkup: " + atomItem.getForeignMarkup().toString());
             }
 //            for (Object oModule : entry.getModules()) {
-//                System.out.println("module: " + oModule.toString());
+//                out.println("module: " + oModule.toString());
 //            }
             for (Object olink : entry.getLinks()) {
                 SyndLinkImpl link = (SyndLinkImpl)olink;
                 String href = link.getHref();
-                System.out.println("link: " + href);
+                out.println("link: " + href);
                 if (href.matches(".*www.youtube.com/watch.*")) {
-                    System.out.println("youtubeUrl: " + href);
+                    out.println("youtubeUrl: " + href);
                 }
             }
             // System.out.println("markup: " + entry.getForeignMarkup().toString());
@@ -141,25 +148,25 @@ public class Feed2Text {
                             if (oChild instanceof Element) {
                                 Element chElem = (Element)oChild;
                                 if (chElem.getName().equals("thumbnail") && chElem.getNamespacePrefix().equals("media")) {
-                                    System.out.println("mediaThumbnail: url=" + chElem.getAttributeValue("url") 
+                                    out.println("mediaThumbnail: url=" + chElem.getAttributeValue("url") 
                                             +" height="+ chElem.getAttributeValue("height") 
                                             +" width="+ chElem.getAttributeValue("width") +" ");
                                 }
                                 if (chElem.getName().equals("title") && chElem.getNamespacePrefix().equals("media")) {
-                                    System.out.println("mediaTitle: " + chElem.getText());
+                                    out.println("mediaTitle: " + chElem.getText());
                                 }
                                 if (chElem.getName().equals("description") && chElem.getNamespacePrefix().equals("media")) {
                                     String md = Utils.cleanup(Utils.removeNewLines(chElem.getText()));
-                                    System.out.println("mediaDescription: " + md);
+                                    out.println("mediaDescription: " + md);
                                 }
                                 if (chElem.getName().equals("credit") && chElem.getNamespacePrefix().equals("media")) {
-                                    System.out.println("mediaCredit: " + chElem.getText());
+                                    out.println("mediaCredit: " + chElem.getText());
                                 }
                             }
                         }
                     }
-//                    System.out.println("element-name: "+ elem.getName() +" namespace: "+ elem.getNamespace().toString());
-//                    System.out.println("\t"+ elem.getValue());
+//                    out.println("element-name: "+ elem.getName() +" namespace: "+ elem.getNamespace().toString());
+//                    out.println("\t"+ elem.getValue());
                 }
             }
             SyndContent desc = entry.getDescription();
@@ -169,14 +176,17 @@ public class Feed2Text {
                     d = Utils.smallifyDescription(Utils.removeNewLines(desc.getValue()));
                 else
                     d = Utils.cleanup(Utils.removeNewLines(desc.getValue()));
-                System.out.println("description: " + d);
+                out.println("description: " + d);
             }
             for (Object oencl : entry.getEnclosures()) {
                 SyndEnclosure encl = (SyndEnclosure)oencl;
-                System.out.println("enclosureUrl: " + encl.getUrl());
-                System.out.println("enclusureMIME: " + encl.getType());
+                out.println("enclosureUrl: " + encl.getUrl());
+                out.println("enclusureMIME: " + encl.getType());
             }
-            System.out.println("");
+            out.println("");
+        }
+        if (out != System.out) {
+            out.close();
         }
     }
     
@@ -199,7 +209,7 @@ public class Feed2Text {
     Long maxAge = null;
     
     void setMaxAge(String max) {
-        setMaxAge(new Long(max));
+        try { setMaxAge(new Long(max)); } catch (Exception e) { }
     }
     
     void setMaxAge(Long max) {
@@ -216,6 +226,6 @@ public class Feed2Text {
             f2t.setMaxAge(args[2]);
         }
         f2t.get();
-        f2t.printEntries();
+        f2t.printEntries(args.length > 3 ? args[3] : null);
     }
 }
