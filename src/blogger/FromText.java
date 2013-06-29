@@ -130,6 +130,10 @@ public class FromText {
                 links.add(href);
         }
         
+        public boolean hasLink(String href) {
+            return links.contains(href);
+        }
+        
         public void addUniqueCategory(String name) {
             name = name.replace(" & ", " and ");
             if (! categories.contains(name))
@@ -137,7 +141,7 @@ public class FromText {
         }
         
         public void removeCategories() {
-            this.categories       = new LinkedList<String>();
+            this.categories = new LinkedList<String>();
         }
         
         public void addDescription(String desc) {
@@ -150,6 +154,10 @@ public class FromText {
         
         public void addUrl(String url) {
             urls.add(url);
+        }
+        
+        public boolean hasUrl(String href) {
+            return urls.contains(href);
         }
         
         public void removeDate() {
@@ -856,6 +864,62 @@ public class FromText {
             out.println("");
         }
         out.close();
+    }
+    
+    public void expandurls(String[] args)
+        throws FileNotFoundException, java.io.IOException
+    {
+        String inputFile  = args[1];
+        String outputFile = args[2];
+        
+        parseText(new File(inputFile));
+        
+        for (Row row : rows) {
+            LinkedList<String> newurls  = new LinkedList<String>();
+            LinkedList<String> newlinks = new LinkedList<String>();
+            for (String link : row.links) {
+                try {
+                    newlinks.addLast(Utils.urlexpander(link));
+                } catch (Exception e) {
+                    newlinks.addLast(link);
+                }
+            }
+            row.links = newlinks;
+            for (String url : row.urls) {
+                try {
+                    newurls.addLast(Utils.urlexpander(url));
+                } catch (Exception e) {
+                    newurls.addLast(url);
+                }
+            }
+            row.urls = newurls;
+        }
+        writeRowsToFile(outputFile, rows);
+    }
+    
+    public void dedupe(String[] args)
+        throws FileNotFoundException, java.io.IOException
+    {
+        String inputFile  = args[1];
+        String outputFile = args[2];
+        
+        parseText(new File(inputFile));
+        
+        LinkedList<Row> newrows   = new LinkedList<Row>();
+        
+        for (Row row : rows) {
+            boolean addit = true;
+            for (Row nrow : newrows) {
+                for (String nlink : row.links) {
+                    if (nrow.hasLink(nlink)) addit = false;
+                }
+                for (String url : row.urls) {
+                    if (nrow.hasUrl(url)) addit = false;
+                }
+            }
+            if (addit) newrows.addLast(row);
+        }
+        writeRowsToFile(outputFile, newrows);
     }
     
     public static void main(String[] args) 
