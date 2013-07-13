@@ -123,7 +123,11 @@ public class Utils {
             .replace(new String(new byte[] { (byte)0xc2, (byte)0x97 }), "")
             .replace(new String(new byte[] { (byte)0xc2, (byte)0x98 }), "")
             .replace(new String(new byte[] { (byte)0xc2, (byte)0x99 }), "")
-            .replace(new String(new byte[] { (byte)0xc2, (byte)0xa0 }), " ");
+            .replace(new String(new byte[] { (byte)0xc2, (byte)0xa0 }), " ")
+            .replace(new String(new byte[] { (byte)0x89, (byte)0x3f }), " ")
+            .replace(new String(new byte[] { (byte)0xcc, (byte)0x3f }), " ")
+            .replace(new String(new byte[] { (byte)0xca, (byte)0x72 }), " ")
+            .replace(new String(new byte[] { (byte)0xd5, (byte)0x73 }), " ");
         
         // Ensure all images fit within the bounds of the blog
         

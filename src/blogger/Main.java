@@ -49,6 +49,7 @@ public class Main {
         else if (args.length > 0 && args[0].equals("feed"))       Reader.feed(args);
         else if (args.length > 0 && args[0].equals("expandurl"))  System.out.println(Utils.urlexpander(args[1]));
         else if (args.length > 0 && args[0].equals("encode"))     System.out.println(Utils.encoded(args[1]));
+        else if (args.length > 0 && args[0].equals("evernote"))   Evernote.main(args);
         else {
             System.out.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
             System.out.println("USAGE - Main feed2text feedUrl");
