@@ -77,18 +77,27 @@ public class Evernote {
         noteStore = factory.createNoteStoreClient();
     }
     
+    /**
+     * Print out a list of tag names
+     **/
     public static void tags(String[] args) throws Exception {
         String token    = args[1];
         Evernote evnt = new Evernote(token);
         evnt.printTags(token);
     }
     
+    /**
+     * Print out a list of notebook names
+     **/
     public static void notebooks(String[] args) throws Exception {
         String token    = args[1];
         Evernote evnt = new Evernote(token);
         evnt.printNotebooks();
     }
     
+    /**
+     * Print out a list of notes given a notebook name and tag name
+     **/
     public static void listnotes(String[] args) throws Exception {
         String token    = args[1];
         String notebook = args[2];
@@ -99,7 +108,7 @@ public class Evernote {
         evnt.printSelectedNotes(outfn, notebook, tag);
     }
     
-    public void printNotebooks() throws Exception {
+    private void printNotebooks() throws Exception {
         List<Notebook> notebooks = noteStore.listNotebooks();
         for (Notebook notebook : notebooks) {
             String nm = notebook.getName();
@@ -107,7 +116,7 @@ public class Evernote {
         }
     }
     
-    public void printTags(String token) throws Exception {
+    private void printTags(String token) throws Exception {
         List<Tag> tags = noteStore.listTags();
         for (Tag tag : tags) {
             System.out.println(tag.getName() +" Guid: "+ tag.getGuid());
@@ -145,6 +154,9 @@ public class Evernote {
                 Note fullNote = noteStore.getNote(note.getGuid(), true, true, true, true);
                 printNote(out, fullNote);
             }
+        }
+        if (outfn != null && ! outfn.equals("-")) {
+            out.close();
         }
     }
     
