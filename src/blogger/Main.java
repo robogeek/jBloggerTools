@@ -49,7 +49,9 @@ public class Main {
         else if (args.length > 0 && args[0].equals("feed"))       Reader.feed(args);
         else if (args.length > 0 && args[0].equals("expandurl"))  System.out.println(Utils.urlexpander(args[1]));
         else if (args.length > 0 && args[0].equals("encode"))     System.out.println(Utils.encoded(args[1]));
-        else if (args.length > 0 && args[0].equals("evernote"))   Evernote.main(args);
+        else if (args.length > 0 && args[0].equals("evertags"))   Evernote.tags(args);
+        else if (args.length > 0 && args[0].equals("evernotebooks"))   Evernote.notebooks(args);
+        else if (args.length > 0 && args[0].equals("everlistnotes"))   Evernote.listnotes(args);
         else {
             System.out.println("USAGE - Main fromtext authorName userName userPasswd blogId inputFile postSummaryFile notPostedFile");
             System.out.println("USAGE - Main feed2text feedUrl");
@@ -73,6 +75,9 @@ public class Main {
             System.out.println("USAGE - Main feed userName userPassword feedUrl maxHours");
             System.out.println("USAGE - Main expandurl url");
             System.out.println("USAGE - Main encode text");
+            System.out.println("USAGE - Main evertags id");
+            System.out.println("USAGE - Main evernotebooks id");
+            System.out.println("USAGE - Main everlistnotes id notebookName tagName");
         }
     }
     

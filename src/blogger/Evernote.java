@@ -8,8 +8,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.StringBufferInputStream;
 import java.security.MessageDigest;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.LinkedList;
 
 import java.io.PrintStream;
 
@@ -48,19 +50,9 @@ import com.evernote.thrift.transport.TTransportException;
 
 public class Evernote {
     
-    private static final String AUTH_TOKEN = "S=s1:U=70c07:E=1472d784f07:C=13fd5c72309:P=1cd:A=en-devtoken:V=2:H=0c42fb2e905167fb0fb8a00417d93873";
-    
     private UserStoreClient userStore;
     private NoteStoreClient noteStore;
     private String newNoteGuid;
-
-    /**
-     * Console entry point.
-     */
-    public static void main(String args[]) throws Exception {
-        Evernote evnt = new Evernote(AUTH_TOKEN);
-        evnt.listNotes();
-    }
     
     /**
      * Intialize UserStore and NoteStore clients. During this step, we
@@ -85,15 +77,44 @@ public class Evernote {
         noteStore = factory.createNoteStoreClient();
     }
     
-    public static void printNotes(String[] args) throws Exception {
-        String notebook = args[1];
-        String outfn    = args.length >= 3 ? args[2] : "-";
-        Evernote evnt = new Evernote(AUTH_TOKEN);
-        
-        evnt.printSelectedNotes(outfn, notebook);
+    public static void tags(String[] args) throws Exception {
+        String token    = args[1];
+        Evernote evnt = new Evernote(token);
+        evnt.printTags(token);
     }
     
-    private void printSelectedNotes(String outfn, String nmNotebook) throws Exception {
+    public static void notebooks(String[] args) throws Exception {
+        String token    = args[1];
+        Evernote evnt = new Evernote(token);
+        evnt.printNotebooks();
+    }
+    
+    public static void listnotes(String[] args) throws Exception {
+        String token    = args[1];
+        String notebook = args[2];
+        String tag      = args[3];
+        String outfn    = args.length >= 5 ? args[4] : "-";
+        Evernote evnt = new Evernote(token);
+        
+        evnt.printSelectedNotes(outfn, notebook, tag);
+    }
+    
+    public void printNotebooks() throws Exception {
+        List<Notebook> notebooks = noteStore.listNotebooks();
+        for (Notebook notebook : notebooks) {
+            String nm = notebook.getName();
+            System.out.println(nm +" Guid: "+ notebook.getGuid());
+        }
+    }
+    
+    public void printTags(String token) throws Exception {
+        List<Tag> tags = noteStore.listTags();
+        for (Tag tag : tags) {
+            System.out.println(tag.getName() +" Guid: "+ tag.getGuid());
+        }
+    }
+    
+    private void printSelectedNotes(String outfn, String nmNotebook, String nmTag) throws Exception {
         PrintStream out = System.out;
         if (outfn != null && ! outfn.equals("-")) {
             out = new PrintStream(outfn);
@@ -106,26 +127,41 @@ public class Evernote {
             String nm = notebook.getName();
             if (! nm.equals(nmNotebook)) continue;
             
+            List<String> tagGuids = new LinkedList<String>();
+            List<Tag> tags = noteStore.listTags();
+            for (Tag tag : tags) {
+                if (tag.getName().equals(nmTag)) tagGuids.add(tag.getGuid());
+            }
+            
             NoteFilter filter = new NoteFilter();
             filter.setNotebookGuid(notebook.getGuid());
+            if (tagGuids.size() > 0) filter.setTagGuids(tagGuids);
             filter.setOrder(NoteSortOrder.CREATED.getValue());
             filter.setAscending(true);
         
             NoteList noteList = noteStore.findNotes(filter, 0, 100);
             List<Note> notes = noteList.getNotes();
             for (Note note : notes) {
-                printNote(out, note);
+                Note fullNote = noteStore.getNote(note.getGuid(), true, true, true, true);
+                printNote(out, fullNote);
             }
         }
+    }
+    
+    private String timeStampString(long ts) {
+        Date dt = new Date(ts);
+        return dt.toString();
     }
     
     private void printNote(PrintStream out, Note note) throws Exception {
         out.println("");
         // out.println(note.toString());
         out.println("title: " + Utils.cleanTitle(Utils.cleanup(note.getTitle())));
-        out.println("evernoteguid: " + note.getGuid().toString());
-        out.println("createdTime: " + note.getCreated());
-        out.println("updatedTime: " + note.getUpdated());
+        out.println("evernoteNoteGuid: " + note.getGuid().toString());
+        out.println("createdTime: " + note.getCreated() +" 0000 "+ timeStampString(note.getCreated()));
+        out.println("updatedTime: " + note.getUpdated() +" 0000 "+ timeStampString(note.getUpdated()));
+        out.println("date: " + note.getUpdated() +" 0000 "+ timeStampString(note.getUpdated()));
+        
         List<String> guids = note.getTagGuids();
         if (guids != null) {
             for (String tagGuid : guids) {
@@ -149,19 +185,34 @@ public class Evernote {
         //         out.println("resource: " + rsrc.toString());
         //     }
         // }
-        out.println("attributes: " + note.getAttributes().toString());
+        // out.println("attributes: " + note.getAttributes().toString());
         String srcUrl = note.getAttributes().getSourceURL();
         if (srcUrl != null) {
             out.println("url: " + srcUrl);
         }
         String content = note.getContent();
         
+        out.println("description: " +
+            Utils.cleanup(Utils.removeNewLines(
+                content
+                .replaceAll("<\\?xml[^>]*>", "")
+                .replaceAll("<!DOCTYPE[^>]*>", "")
+                .replaceAll("<en-note[^>]*>", "")
+                .replaceAll("</en-note>", "")
+        )));
+        
+        /*
+         * This actually takes quite a while to execute ..
+         * So, using the replaceAll stuff above instead
+         * 
         if (content != null) {
+            // First we parse the content (because it's XML)
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(new InputSource(new StringReader(content)));
             // Document doc = dBuilder.parse(new StringBufferInputStream(content));
             
+            // Next we find the en-note tag
             NodeList nl = doc.getChildNodes(); // .getElementsByTagName("en-note");
             for (int i = 0; i < nl.getLength(); i++) {
                 Node n = nl.item(i);
@@ -169,27 +220,31 @@ public class Evernote {
                 Element e = (Element)n;
                 if (! e.getTagName().equals("en-note")) continue;
                 
+                // Then with just the en-note tag in hand
+                // we convert it into a string
                 TransformerFactory transFactory = TransformerFactory.newInstance();
                 Transformer transformer = transFactory.newTransformer();
                 StringWriter buffer = new StringWriter();
                 transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
                 transformer.setOutputProperty(OutputKeys.INDENT, "no");
                 transformer.transform(new DOMSource(e), new StreamResult(buffer));
-                String str = buffer.toString();
                 
-                str = str.replaceAll("<(en-note[^>]*)>", "")
-                         .replaceAll("</en-note>", "");
+                // removing some tags
+                String str = buffer.toString()
+                            .replaceAll("<en-note[^>]*>", "")
+                            .replaceAll("</en-note>", "");
                 
+                // cleaning it up and printing it
                 out.println("description: " + Utils.cleanup(Utils.removeNewLines(str)));
             }
-        }
+        }*/
         out.println("");
     }
     
     /**
      * Retrieve and display a list of the user's notes.
      */
-    private void listNotes() throws Exception {
+    /* private void listNotes() throws Exception {
         // List the notes in the user's account
         System.out.println("Listing notes:");
       
@@ -217,6 +272,6 @@ public class Evernote {
             }
         }
         System.out.println();
-    }
+    } */
 
 }
