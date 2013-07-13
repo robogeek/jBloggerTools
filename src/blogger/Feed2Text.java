@@ -225,7 +225,9 @@ public class Feed2Text {
         if (args.length > 2) {
             f2t.setMaxAge(args[2]);
         }
-        f2t.get();
-        f2t.printEntries(args.length > 3 ? args[3] : null);
+        try {
+            f2t.get();
+            f2t.printEntries(args.length > 3 ? args[3] : null);
+        } catch (Exception e) { }
     }
 }

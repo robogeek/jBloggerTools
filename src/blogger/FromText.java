@@ -247,8 +247,14 @@ public class FromText {
     private void parseText(File inputFile)
         throws java.io.FileNotFoundException, java.io.IOException
     {
-        FileReader fr = new FileReader(inputFile);
-        BufferedReader br = new BufferedReader(fr);
+        FileReader fr = null;
+        BufferedReader br = null;
+        try {
+            fr = new FileReader(inputFile);
+            br = new BufferedReader(fr);
+        } catch (Exception e) {
+            return;
+        }
         String line;
         Row thisRow;
         for (thisRow = new Row(); (line = br.readLine()) != null; /*thisRow = new Row()*/) {
@@ -382,7 +388,7 @@ public class FromText {
                         ? generateEnclosurePlayer(row.enclosureUrl, row.enclusureMIME)
                         : ""
                     );
-            IEntry Ipost = blog.createPost(row.title,
+            IEntry Ipost = blog.createPost(Utils.cleanup(row.title),
                     post,
                     row.categories,
                     false, publ, publ);
@@ -406,8 +412,8 @@ public class FromText {
            +"@descriptions@\n"
            +"@images@\n"
            +"@youtube@\n"
-           +"@enclosures@\n"
            +"@urls@\n"
+           +"@enclosures@\n"
            +"@mediaCredit@\n"
            +"<br/>\n";
     
@@ -423,7 +429,7 @@ public class FromText {
     
     static final String descriptTemplate = "<p>@description@</p>\n";
     static final String linkTemplate  = "<p><a href=\"@url@\">@linkText@</a></p>\n";
-    static final String smLinkTemplate  = "<p><span style='font-size: x-small;'><a href=\"@url@\">@linkText@</a></span></p>\n";
+    static final String smLinkTemplate  = "<p><span style='font-size: small;'><a href=\"@url@\">@linkText@</a></span></p>\n";
     static final String thumbTemplate = "<p><img style='max-width: 200px' width='@width' height='@height' src=\"@imageurl@\"/></p>";
     static final String mediaCreditTemplate = "<p><b>Credit</b>: @mediaCredit@</p>\n";
     
@@ -467,7 +473,7 @@ public class FromText {
             
             // Colorize the tag (if any) in the title
             // But colorize it only the first time the tag is used
-            String rowTitle = row.title;
+            String rowTitle = Utils.cleanup(row.title);
             String reMatchTag = "^([A-Za-z0-9\\s]+) - ";
             if (tagColor != null) {
                 Pattern p = Pattern.compile(reMatchTag);
@@ -536,13 +542,15 @@ public class FromText {
         return "";
     }
     
-    String mediaSummaryTemplate = "<a href='@fileURL@'>@contentType@ @fileURL@</a>";
+    String mediaSummaryTemplate = "<span style='font-size: x-small;'>Enclosure: @contentType@ <a href='@fileURL@'>@fileURLtxt@</a></span>";
     
     String generateEnclosureSummary(String enclUrl, String enclType) {
         return Matcher.quoteReplacement(
             mediaSummaryTemplate
                 .replaceAll("@contentType@", enclType)
                 .replaceAll("@fileURL@", enclUrl)
+                .replaceAll("@fileURLtxt@",
+                    enclUrl.substring(0, enclUrl.length() > 61 ? 60 : enclUrl.length() - 1))
         );
     }
     
