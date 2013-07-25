@@ -110,6 +110,9 @@ public class Feed2Text {
                 SyndCategoryImpl category = (SyndCategoryImpl) oo;
                 String tagName = category.getName();
                 if (tagName.startsWith("http:")) continue;
+                if (tagName.startsWith("fromFeedly")) continue;
+                if (tagName.startsWith("yourTag")) continue;
+                if (tagName.startsWith("Recently Read")) continue;
                 out.println("tag: " + tagName);
             }
             if (rssItem != null && rssItem.getGuid() != null) {
