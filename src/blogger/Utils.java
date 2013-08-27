@@ -11,6 +11,91 @@ import java.util.regex.Pattern;
 public class Utils {
     
     /**
+     *
+     **/
+    public static String substituteImage(String url) {
+        String AU = "http://audio.davidherron.com/jBlogger/img/";
+        if (url.contains("autoblog.com")) return AU+"autoblog-com.jpg";
+        if (url.contains("bikeportland.org")) return AU+"bikeportland-org.jpg";
+        if (url.contains("forbes.com")) return AU+"forbes-com.jpg";
+        if (url.contains("greencarcongress.com")) return AU+"green-car-congress-com.jpg";
+        if (url.contains("thecarconnection.com")) return AU+"thecarconnection-com.jpg";
+        if (url.contains("treehugger.com")) return AU+"treehugger-com.jpg";
+        if (url.contains("torquenews.com")) return AU+"torquenews-com.jpg";
+        if (url.contains("greencarreports.com")) return AU+"greencarreports-com.jpg";
+        if (url.contains("plugincars.com")) return AU+"plugincars-com.jpg";
+        if (url.contains("plugincars.com")) return AU+"plugincars-com.jpg";
+        if (url.contains("gas2.org")) return AU+"gas2-org.jpg";
+        if (url.contains("switchboard.nrdc.org")) return AU+"switchboard-nrdc-org.jpg";
+        if (url.contains("businesswire.com")) return AU+"businesswire-com.jpg";
+        if (url.contains("insideevs.com")) return AU+"insideevs-com.jpg";
+        if (url.contains("wired.com")) return AU+"wired-com.jpg";
+        if (url.contains("valuewalk.com")) return AU+"valuewalk-com.jpg";
+        if (url.contains("sierraclub.typepad.com")) return AU+"sierraclub.jpg";
+        if (url.contains("theenergycollective.com")) return AU+"theenergycollective-com.jpg";
+        if (url.contains("theguardian.com")) return AU+"theguardian-com.jpg";
+        if (url.contains("bbc.co.uk")) return AU+"bbc-co-uk.jpg";
+        if (url.contains("reuters.com")) return AU+"reuters-com.jpg";
+        if (url.contains("thinkprogress.org")) return AU+"thinkprogress-org.jpg";
+        if (url.contains("climatedesk.org")) return AU+"climatedesk-org.jpg";
+        if (url.contains("phys.org")) return AU+"phys-org.jpg";
+        if (url.contains("fastcompany.com")) return AU+"fastcompany-com.jpg";
+        if (url.contains("salon.com")) return AU+"salon-com.jpg";
+        if (url.contains("cnn.com")) return AU+"cnn-com.jpg";
+        if (url.contains("propublica.org")) return AU+"propublica-org.jpg";
+        if (url.contains("gigaom.com")) return AU+"gigaom-com.jpg";
+        if (url.contains("sbwire.com")) return AU+"sbwire-com.jpg";
+        if (url.contains("bnamericas.com")) return AU+"bnamericas-com.jpg";
+        if (url.contains("medicinenet.com")) return AU+"medicinenet-com.jpg";
+        if (url.contains("scientificamerican.com")) return AU+"scientificamerican-com.jpg";
+        if (url.contains("nytimes.com")) return AU+"nytimes-com.jpg";
+        if (url.contains("abcnews.go.com")) return AU+"abcnews-go-com.jpg";
+        if (url.contains("sciencedaily.com")) return AU+"sciencedaily-com.jpg";
+        if (url.contains("medicalxpress.com")) return AU+"medicalxpress-com.jpg";
+        if (url.contains("webmd.com")) return AU+"webmd-com.jpg";
+        if (url.contains("nbcnews.com")) return AU+"nbcnews-com.jpg";
+        if (url.contains("medicalnewstoday.com")) return AU+"medicalnewstoday-com.jpg";
+        if (url.contains("today.com")) return AU+"today-com.jpg";
+        if (url.contains("nlm.nih.gov")) return AU+"nlm-nih-gov.jpg";
+        if (url.contains("io9.com")) return AU+"io9-com.jpg";
+        if (url.contains("theblaze.com")) return AU+"theblaze-com.jpg";
+        if (url.contains("hsph.harvard.edu")) return AU+"hsph-harvard-edu.jpg";
+        if (url.contains("huffingtonpost.com")) return AU+"huffingtonpost-com.jpg";
+        if (url.contains("spiritualityandpractice.com")) return AU+"spiritualityandpractice-com.jpg";
+        if (url.contains("businessinsider.com")) return AU+"businessinsider-com.jpg";
+        if (url.contains("earthtechling.com")) return AU+"earthtechling-com.jpg";
+        if (url.contains("cbsnews.com")) return AU+"cbsnews-com.jpg";
+        if (url.contains("inhabitat.com")) return AU+"inhabitat-com.jpg";
+        if (url.contains("pcworld.com")) return AU+"pcworld-com.jpg";
+        if (url.contains("climatecentral.org")) return AU+"climatecentral-org.jpg";
+        if (url.contains("cleantechnica.com")) return AU+"cleantechnica-com.jpg";
+        if (url.contains("mashable.com")) return AU+"mashable-com.jpg";
+        if (url.contains("independent.co.uk")) return AU+"independent-co-uk.jpg";
+        if (url.contains("bettercities.net")) return AU+"bettercities-net.jpg";
+        if (url.contains("examiner.com")) return AU+"examiner-com.jpg";
+        if (url.contains("greentechmedia.com")) return AU+"greentechmedia-com.jpg";
+        if (url.contains("esolarenergynews.com")) return AU+"esolarenergynews-com.jpg";
+        if (url.contains("solardaily.com")) return AU+"solardaily-com.jpg";
+        if (url.contains("ncsc.ncsu.edu")) return AU+"ncsc-ncsu-edu.jpg";
+        if (url.contains("tabtimes.com")) return AU+"tabtimes-com.jpg";
+        if (url.contains("news.cnet.com")) return AU+"news-cnet-com.jpg";
+        if (url.contains("mit.edu")) return AU+"mit-edu.jpg";
+        if (url.contains("allthingsd.com")) return AU+"allthingsd-com.jpg";
+        if (url.contains("techhive.com")) return AU+"techhive-com.jpg";
+        if (url.contains("kotaku.com")) return AU+"kotaku-com.jpg";
+        if (url.contains("gizmodo.com")) return AU+"gizmodo-com.jpg";
+        if (url.contains("techcrunch.com")) return AU+"techcrunch-com.jpg";
+        if (url.contains("earth911.com")) return AU+"earth911-com.jpg";
+        if (url.contains("entrepreneur.com")) return AU+"entrepreneur-com.jpg";
+        if (url.contains("engadget.com")) return AU+"engadget-com.jpg";
+        if (url.contains("aol.com")) return AU+"aol-com.jpg";
+        if (url.contains("electriccarsreport.com")) return AU+"electriccarsreport-com.jpg";
+        if (url.contains("momentummag.com")) return AU+"momentummag-com.jpg";
+        if (url.contains("electricbike.com")) return AU+"electricbike-com.jpg";
+        return null;
+    }
+    
+    /**
      * Radically shorten text by removing all HTML tags, cutting the total length to 450 characters,
      * and leaving just one image tag.  This is meant for those sites that publish full articles
      * in RSS feeds and/or publish a bunch of excess HTML in their feed.  
@@ -19,7 +104,9 @@ public class Utils {
         // Start the smallified description with no HTML tags, and really short
         String ret = cleanup(desc);
         // Get rid of any tag, period
-        ret = ret.replaceAll("<[^>]*>", "");
+        ret = ret.replaceAll("<[^>]*>", "")
+            .replaceAll("add this on Delicious", "")
+            .replaceAll("more about this link", "");
         String retsave = ret;
         try { ret = ret.substring(0, ret.length() > 451 ? 450 : ret.length() - 1); } catch (Exception e) {
             ret = retsave;
@@ -29,8 +116,18 @@ public class Utils {
         // Then find the first image in desc, and append that to the returned string
         Pattern p = Pattern.compile("<img[^>]*>");
         Matcher m = p.matcher(desc);
-        if (m.find()) {
-            ret += "<div style='clear:both'>" + desc.substring(m.start(), m.end()) + "</div>";
+        boolean done = false;
+        for (m.find(); !done; m.find()) {
+            String imgString = null;
+            try {
+                imgString = desc.substring(m.start(), m.end());
+            } catch(Exception e) {
+                done = true;
+            }
+            if (imgString != null && imgString.indexOf("previous.delicious.com/static/img") < 0) {
+                ret += "<div style='clear:both'>" + imgString + "</div>";
+                done = true;
+            }
         }
         return ret;
     }
@@ -52,7 +149,11 @@ public class Utils {
     static String cleanTitle(String title) {
         return title.replaceAll("<b>", "")
             .replace("</b>", "")
-            .replace(new String(new byte[] { (byte)0xD1 }), "");
+            .replace(new String(new byte[] { (byte)0xD0 }), "--")
+            .replace(new String(new byte[] { (byte)0xD1 }), "")
+            .replace(new String(new byte[] { (byte)0xD2 }), "\"")
+            .replace(new String(new byte[] { (byte)0xD3 }), "\"")
+            .replace(new String(new byte[] { (byte)0xD5 }), "'");
     }
     
     /**
@@ -127,7 +228,12 @@ public class Utils {
             .replace(new String(new byte[] { (byte)0x89, (byte)0x3f }), " ")
             .replace(new String(new byte[] { (byte)0xcc, (byte)0x3f }), " ")
             .replace(new String(new byte[] { (byte)0xca, (byte)0x72 }), " ")
-            .replace(new String(new byte[] { (byte)0xd5, (byte)0x73 }), " ");
+            .replace(new String(new byte[] { (byte)0xd5, (byte)0x73 }), " ")
+            .replace(new String(new byte[] { (byte)0xD0 }), "--")
+            .replace(new String(new byte[] { (byte)0xD1 }), "")
+            .replace(new String(new byte[] { (byte)0xD2 }), "\"")
+            .replace(new String(new byte[] { (byte)0xD3 }), "\"")
+            .replace(new String(new byte[] { (byte)0xD5 }), "'");
         
         // Ensure all images fit within the bounds of the blog
         
@@ -166,19 +272,25 @@ public class Utils {
     static String urlexpander(URL url)
         throws java.net.MalformedURLException, java.io.IOException
     {
-        // The idea here is that with .setFollowRedirects(true), Java will go ahead
-        // and traverse the redirects from the short URL service(s)
-        HttpURLConnection c = (HttpURLConnection)url.openConnection();
-        HttpURLConnection.setFollowRedirects(true);
-        c.setInstanceFollowRedirects(true);
-        c.setConnectTimeout(15000);
-        c.setReadTimeout(15000);
-        c.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; ru; rv:1.9.0.11) Gecko/2009060215 Firefox/3.0.11 (.NET CLR 3.5.30729)");
-        c.connect();
-        // Once we do this ...
-        c.getInputStream();
-        // ... .getURL() returns the right URL
-        return c.getURL().toString();
+        try {
+            // The idea here is that with .setFollowRedirects(true), Java will go ahead
+            // and traverse the redirects from the short URL service(s)
+            HttpURLConnection c = (HttpURLConnection)url.openConnection();
+            HttpURLConnection.setFollowRedirects(true);
+            c.setInstanceFollowRedirects(true);
+            c.setConnectTimeout(15000);
+            c.setReadTimeout(15000);
+            c.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; ru; rv:1.9.0.11) Gecko/2009060215 Firefox/3.0.11 (.NET CLR 3.5.30729)");
+            c.connect();
+            // Once we do this ...
+            c.getInputStream();
+            // ... .getURL() returns the right URL
+            return c.getURL().toString();
+        } catch (java.net.UnknownHostException uhe) {
+            return url.toString();
+        } catch (javax.net.ssl.SSLProtocolException spe) {
+            return url.toString();
+        }
     }
     
     static String cleanurl(String url) 

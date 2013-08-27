@@ -344,6 +344,19 @@ public class FromText {
             if (Sdesc == null || Sdesc.equals(""))
                 Sdesc = (row.mediaDescription != null && row.mediaDescription.length() > 0)
                     ? row.mediaDescription : "";
+                    
+            for (String url : row.urls) {
+                url = Utils.cleanurl(Utils.urlexpander(url));
+                String substUrl = Utils.substituteImage(url);
+                if (substUrl != null) {
+                    Sdesc = logoImageTemplate
+                        .replaceAll("@imgurl@", substUrl)
+                        .replaceAll("@description@",
+                                    (Sdesc != null && Sdesc.length() > 0)
+                                    ? Matcher.quoteReplacement(Sdesc) : "");
+                    break;
+                }
+            }
             
             String MC = 
                     (row.mediaCredit != null && row.mediaCredit.length() > 0)
@@ -415,7 +428,7 @@ public class FromText {
            +"@urls@\n"
            +"@enclosures@\n"
            +"@mediaCredit@\n"
-           +"<br/>\n";
+           +"<br/><br/>\n";
     
 //    static final String postTemplate2 =
 //            "<p><b>@title@</b></p>\n"
@@ -434,6 +447,8 @@ public class FromText {
     static final String mediaCreditTemplate = "<p><b>Credit</b>: @mediaCredit@</p>\n";
     
     static final String imageTemplate = "<p><img style='max-width: 100%' src='@imageurl@'/></p>";
+    static final String logoImageTemplate = "<img src='@imgurl@' align='right' style='max-width: 300px;'/>@description@";
+    
     
     static final String youtubeTemplate = "<iframe width='450' height='253' src='http://www.youtube.com/embed/@code@' frameborder='0' allowfullscreen></iframe>";
     
@@ -469,6 +484,19 @@ public class FromText {
                 outUrls.addLast(url);
                 urls += smLinkTemplate.replaceAll("@url@", Matcher.quoteReplacement(url))
                     .replaceAll("@linkText@", url.substring(0, url.length() > 61 ? 60 : url.length() - 1));
+            }
+            
+            for (String url : row.urls) {
+                url = Utils.cleanurl(Utils.urlexpander(url));
+                String substUrl = Utils.substituteImage(url);
+                if (substUrl != null) {
+                    description = logoImageTemplate
+                        .replaceAll("@imgurl@", substUrl)
+                        .replaceAll("@description@",
+                                    (description != null && description.length() > 0)
+                                    ? Matcher.quoteReplacement(description) : "");
+                    break;
+                }
             }
             
             // Colorize the tag (if any) in the title

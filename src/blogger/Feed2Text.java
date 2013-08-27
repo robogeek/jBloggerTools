@@ -67,7 +67,14 @@ public class Feed2Text {
         if (isFile) {
             reader = new XmlReader(feedFile);
         } else {
-            reader = new XmlReader(feedURL);
+            HttpURLConnection c = (HttpURLConnection)feedURL.openConnection();
+            HttpURLConnection.setFollowRedirects(true);
+            c.setInstanceFollowRedirects(true);
+            c.setConnectTimeout(15000);
+            c.setReadTimeout(15000);
+            c.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; ru; rv:1.9.0.11) Gecko/2009060215 Firefox/3.0.11 (.NET CLR 3.5.30729)");
+            c.connect();
+            reader = new XmlReader(c);
         }
         SyndFeedInput input = new SyndFeedInput();
         input.setPreserveWireFeed(true);
@@ -93,6 +100,7 @@ public class Feed2Text {
             
             // Flags for sites that get special treatment
             boolean isBusinessInsider = false;
+            boolean isDelicious = false;
             
             Date publ = entry.getPublishedDate();
             if (publ == null) publ = new Date();
@@ -100,7 +108,7 @@ public class Feed2Text {
 //            if (oItem != null) System.out.println("wireEntry: " + oItem.toString()); 
             if (oItem instanceof Item)  rssItem  = (Item)  oItem;
             if (oItem instanceof Entry) atomItem = (Entry) oItem;
-            out.println("title: " + Utils.cleanTitle(entry.getTitle())); 
+            out.println("title: " + Utils.cleanTitle(entry.getTitle().trim())); 
             out.println("date: " + Long.toString(publ.getTime()) +" "+ Long.toString(publ.getTimezoneOffset()));
                 // entry.getPublishedDate().toString());
             out.println("url: " + entry.getLink());
@@ -108,7 +116,7 @@ public class Feed2Text {
             if (entry.getUri().contains("www.businessinsider.com")) isBusinessInsider = true;
             for (Object oo : entry.getCategories()) {
                 SyndCategoryImpl category = (SyndCategoryImpl) oo;
-                String tagName = category.getName();
+                String tagName = category.getName().trim();
                 if (tagName.startsWith("http:")) continue;
                 if (tagName.startsWith("fromFeedly")) continue;
                 if (tagName.startsWith("yourTag")) continue;
@@ -116,7 +124,9 @@ public class Feed2Text {
                 out.println("tag: " + tagName);
             }
             if (rssItem != null && rssItem.getGuid() != null) {
-                out.println("rssguid: " + Utils.removeNewLines(rssItem.getGuid().toString()));
+                String guid = Utils.removeNewLines(rssItem.getGuid().toString());
+                if (guid.indexOf("previous.delicious.com") >= 0) isDelicious = true;
+                out.println("rssguid: " + guid);
                 // out.println("rssDescription: " + rssItem.getDescription());
             }
             if (atomItem != null) {
@@ -175,10 +185,11 @@ public class Feed2Text {
             SyndContent desc = entry.getDescription();
             if (desc != null && desc.getValue().length() > 0) {
                 String d = "";
-                if (isBusinessInsider)
+                if (!isDelicious) {
                     d = Utils.smallifyDescription(Utils.removeNewLines(desc.getValue()));
-                else
-                    d = Utils.cleanup(Utils.removeNewLines(desc.getValue()));
+                } else {
+                    d = Utils.removeNewLines(desc.getValue());
+                }
                 out.println("description: " + d);
             }
             for (Object oencl : entry.getEnclosures()) {
