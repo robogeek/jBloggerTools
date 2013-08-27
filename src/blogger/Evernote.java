@@ -61,7 +61,9 @@ public class Evernote {
      */
     public Evernote(String token) throws Exception {
         // Set up the UserStore client and check that we can speak to the server
+        // FOR TESTING --
         EvernoteAuth evernoteAuth = new EvernoteAuth(EvernoteService.SANDBOX, token);
+        // FOR PRODUCTION -- EvernoteAuth evernoteAuth = new EvernoteAuth(EvernoteService.PRODUCTION, token);
         ClientFactory factory = new ClientFactory(evernoteAuth);
         userStore = factory.createUserStoreClient();
       
